@@ -24,7 +24,7 @@ def messageResponse(response):
 		if "contact" in response["outcome"]["entities"]:
 			speak = "It's nice to meet you " + response["outcome"]["entities"]["contact"]["value"]
 		else:
-			speak = "I'm sorry, I didn't understand what you said"
+			speak = "I'm sorry, I didn't catch your name"
 
 	elif (response["outcome"]["intent"] == "request"):
 		if "Coffee" in response["outcome"]["entities"]:
@@ -40,6 +40,8 @@ def messageResponse(response):
 	elif (response["outcome"]["intent"] == "question"):
 		if "Random_Question" in response["outcome"]["entities"]:
 			speak = "Now how am I supposed to know that!?"
+		elif "Name_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+			speak = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Bob the Barista"
 		elif "Coffee_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"]:
 			speak = "The coffee take around 25 seconds to make"
 		elif "Coffee_Question" in response["outcome"]["entities"] and "Cost_Question" in response["outcome"]["entities"]:
@@ -62,12 +64,10 @@ def messageResponse(response):
 			speak = "I'd imagine I'll be here for a good while yet"
 		elif "Here_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
 			speak = "I've been here as long as I can remember... I'm not very old mind you"
-		elif "Here_Question" in response["outcome"]["entities"]:
+		elif "Here_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
 			speak = "I'm here to server coffee.  And I'd like to think I bring a smile to peoples faces"
 		elif "How_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
 			speak = "I'm very well thankyou for asking.  Noone ever asks me how I am. Sad really"
-		elif "Name_Question" in response["outcome"]["entities"]:
-			speak = "What an interesting question.  You know I've never really thought about that.  I just don't know.  I'm going to call myself Bob the Barista"
 		else:
 			speak = "I'm sorry, I'm not quite sure how to answer that"
 
@@ -94,6 +94,14 @@ def messageResponse(response):
 			speak = "It is one of the better days I've had"
 		else:
 			speak = "I think I need a hearing aid, I didn't quite catch that"
+
+	elif (response["outcome"]["intent"] == "command"):
+		if "Vulgar" in response["outcome"]["entities"]:
+			speak = "I'll not be spoken to like that, please leave"
+		elif "Please" in response["outcome"]["entities"] or "Polite" in response["outcome"]["entities"]:
+			speak = "Thankyou for being polite, but i'd rather you not order me around"
+		else:
+			speak = "I'm not taking orders, ask me nicely"
 
 	elif (response["outcome"]["intent"] == "affirmative"):
 		speak = "Thanks, that's great news"
@@ -127,16 +135,8 @@ if __name__ == '__main__':
 		message = urllib.quote(message)
 
 		response = witLookup(message)
-
-		if "Drink" in response["outcome"]["entities"]:
-			if "Sarcastic" in response["outcome"]["entities"]:
-				print "Don't you get sarkie with me"
-			elif "Polite" in response["outcome"]["entities"]:
-				print "Of course I'll get you a " + response["outcome"]["entities"]["Drink"]["value"]
-			else :
-				print "You know asking politely for a " + response["outcome"]["entities"]["Drink"]["value"] + " wouldn't hurt"
-		else:
-			print "I didn't catch that, sorry"
+		messageResponse(response)
+		
 	else:
 		while (1):
 			try:
