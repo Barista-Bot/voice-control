@@ -82,7 +82,6 @@ def listen_for_speech():
             print "Stopping audio stream"
             stream.stop_stream()
             call(["python2.7", "conversation.py", "\"" + spoken[0]["utterance"] + "\""])
-            print "Here"
             #parsed = witLookup(spoken[0]['utterance'])
             #messageResponse(parsed)
             #reset all
@@ -90,6 +89,9 @@ def listen_for_speech():
             slid_win = deque(maxlen=SILENCE_LIMIT*rel)
             all_m= []
             print "listening ..."
+        else:
+            all_m= []
+            all_m.append(data)
 
     print "* done recording"
     stream.close()
