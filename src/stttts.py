@@ -10,6 +10,31 @@ from StringIO import StringIO
 from subprocess import call
 import pycurl, urllib, json, sys
 
+def googleTTS(text='hello', lang='en', fname='result.wav', player='mplayer'):
+    """ Send text to Google's text to speech service
+    and returns created speech (wav file). """
+
+    print "In speak"
+    limit = min(100, len(text))#100 characters is the current limit.
+    text = text[0:limit]
+    print "Text to speech:", text
+    url = "http://translate.google.com/translate_tts"
+    values = urllib.urlencode({"q": text, "textlen": len(text), "tl": lang})
+    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
+    #TODO catch exceptions
+    req = urllib2.Request(url, data=values, headers=hrs)
+    p = urllib2.urlopen(req)
+    f = open(fname, 'wb')
+    f.write(p.read())
+    f.close()
+    print "Speech saved to:", fname
+    play_wav(fname, player)
+
+
+def play_wav(filep, player='mplayer'):
+    print "Playing %s file using %s" % (filep, player)
+    os.system(player + " " + filep)
+
 def find_input_device(pyaudio):
         device_index = None            
         for i in range( pyaudio.get_device_count() ):     
@@ -39,7 +64,7 @@ def listen_for_speech():
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 16000
-    THRESHOLD = 180 #The threshold intensity that defines silence signal (lower than).
+    THRESHOLD = 150 #The threshold intensity that defines silence signal (lower than).
     SILENCE_LIMIT = 2 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
     #open stream
@@ -55,7 +80,6 @@ def listen_for_speech():
     print "* listening. CTRL+C to finish."
     all_m = []
     data = ''
-    SILENCE_LIMIT = 2
     rel = RATE/chunk
     slid_win = deque(maxlen=SILENCE_LIMIT*rel)
     started = False
@@ -71,21 +95,21 @@ def listen_for_speech():
         if(True in [ x>THRESHOLD for x in slid_win]):
             if(not started):
                 print "starting record"
-            started = True
+                started = True
             all_m.append(data)
         elif (started==True):
             print "finished"
+            started = False
+            print "Stopping audio stream"
+            stream.stop_stream()
             #the limit was reached, finish capture and deliver
             filename = save_speech(all_m,p)
             spoken = stt_google_wav(filename)
             print spoken[0]["utterance"]
-            print "Stopping audio stream"
-            stream.stop_stream()
-            call(["python2.7", "conversation.py", "\"" + spoken[0]["utterance"] + "\""])
-            #parsed = witLookup(spoken[0]['utterance'])
-            #messageResponse(parsed)
+            #call(["python2.7", "conversation.py", "\"" + spoken[0]["utterance"] + "\""])
+            parsed = witLookup(spoken[0]['utterance'])
+            messageResponse(parsed)
             #reset all
-            started = False
             slid_win = deque(maxlen=SILENCE_LIMIT*rel)
             all_m= []
             print "listening ..."
@@ -145,6 +169,7 @@ def witLookup(message):
     return json.loads(storage.getvalue())
 
 def messageResponse(response):
+    print "Responding to message"
     if (response["outcome"]["intent"] == "hello"):
         speak = "Hello there, it's nice to meet you, what's your name?"
 
@@ -243,7 +268,6 @@ def messageResponse(response):
         elif "Negative_Emotion" in response["outcome"]["entities"]:
             speak = "That's a shame, here, have a coffee to cheer you up"
 
-
     elif (response["outcome"]["intent"] == "apology"):
         speak = "Don't worry about it, I'm used to it by now"
 
@@ -254,7 +278,8 @@ def messageResponse(response):
     else:
         speak = "I'm sorry, I didn't catch that"
 
-    call(["espeak", "\"" + speak + "\""])
+    print "Running speak: " + speak
+    googleTTS(speak)
 
 FLAC_CONV = 'flac -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
