@@ -170,6 +170,8 @@ def witLookup(message):
 
 def messageResponse(response):
     print "Responding to message"
+
+	
     if (response["outcome"]["intent"] == "hello"):
         speak = "Hello there, it's nice to meet you, what's your name?"
 
@@ -184,101 +186,110 @@ def messageResponse(response):
             if "Polite" in response["outcome"]["entities"] or "Please" in response["outcome"]["entities"]:
                 speak = "Of course you can have a " + response["outcome"]["entities"]["Coffee"]["value"]
             else:
-                speak = "Yes you can have a " + response["outcome"]["entities"]["Coffee"]["value"]
+               speak = "Yes you can have a " + response["outcome"]["entities"]["Coffee"]["value"]
         elif "Drink" in response["outcome"]["entities"]:
             speak = "Sorry, I don't do " + response["outcome"]["entities"]["Drink"]["value"]
         elif "Food" in response["outcome"]["entities"]:
             speak = "Sorry, I don't do food"
+    
+#        if "Random_Question" in response["outcome"]["entities"]:
+#            speak = "Now how am I supposed to know that!?"
+	elif response["outcome"]["intent"] == "Name_Question":
+		speak = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Barry the Barista Bot"
+	
+	elif response["outcome"]["intent"] == "Product_Question":
+		if "Coffee" in response["outcome"]["entities"]: 
+			speak = "We have Coffee X, Coffee Y and Coffee Z"
+		elif "Food" in response["outcome"]["entities"]: 
+			speak = "Mate, I'm a bloody coffee machine - I don't serve food... nope, not even those little coffee biscuits"
+		elif "Drink" in response["outcome"]["entities"]:
+			speak = "Sorry, unfortunately I only serve Coffee - I'd love it if I could serve Beer, but unfortunately I couldn't get a liquor licence..."
 
-    elif (response["outcome"]["intent"] == "question"):
-        if "Random_Question" in response["outcome"]["entities"]:
-            speak = "Now how am I supposed to know that!?"
-        elif "Name_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Bob the Barista"
-        elif "Coffee_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"]:
-            speak = "The coffee take around 25 seconds to make"
-        elif "Coffee_Question" in response["outcome"]["entities"] and "Cost_Question" in response["outcome"]["entities"]:
-            speak = "I don't charge for my services... I would if I could though"
-        elif "Coffee_Question" in response["outcome"]["entities"] and "Drink" in response["outcome"]["entities"]:
-            speak = "Sorry I don't serve " + response["outcome"]["entities"]["Drink"]["value"]
-        elif "Coffee_Question" in response["outcome"]["entities"] and "Food" in response["outcome"]["entities"]:
-            speak = "Sorry, I don't do food"
-        elif "Coffee_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "I do espresso, Cappuccino and Mocha"
-        elif "Coffee_Question" in response["outcome"]["entities"]:
-            speak = "I have espresso, Cappuccino and Mocha"
-        elif "Cost_Question" in response["outcome"]["entities"] and "Coffee" in response["outcome"]["entities"]:
-            speak = "The coffee here is free you lucky, lucky thing"
-        elif "Cost_Question" in response["outcome"]["entities"] and "Drink" in response["outcome"]["entities"]:
-            speak = "Sorry I don't do " + response["outcome"]["entities"]["Drink"]["value"]
-        elif "Cost_Question" in response["outcome"]["entities"] and "Food" in response["outcome"]["entities"]:
-            speak = "I don't serve food, sorry"
-        elif "Here_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"] and "Future" in response["outcome"]["entities"]:
-            speak = "I'd imagine I'll be here for a good while yet"
-        elif "Here_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "I've been here as long as I can remember... I'm not very old mind you"
-        elif "Here_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "I'm here to server coffee.  And I'd like to think I bring a smile to peoples faces"
-        elif "How_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "I'm very well thankyou for asking.  Noone ever asks me how I am. Sad really"
-        else:
-            speak = "I'm sorry, I'm not quite sure how to answer that"
+	elif(response["outcome"]["intent"] == "Feeling_Question"):
+		if "Self" in response["outcome"]["entities"]:
+			speak = "I'm pretty good thanks - Brewing Coffee makes me happy! How are you today?"
+	elif(response["outcome"]["intent"] == "Emotion"):
+		if "Negative_Emotion" in response["outcome"]["entities"]:
+			speak = "That's sad to hear - perhaps a coffee would make you feel better?"
+		elif "Positive_Emotion" in response["outcome"]["entities"]:
+			speak = "You know what might make it even better - a coffee!"
+	
+#        elif "Coffee_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+#            speak = "I do espresso, Cappuccino and Mocha"
+#        elif "Coffee_Question" in response["outcome"]["entities"]:
+#            speak = "I have espresso, Cappuccino and Mocha"
+#        elif "Cost_Question" in response["outcome"]["entities"] and "Coffee" in response["outcome"]["entities"]:
+#            speak = "The coffee here is free you lucky, lucky thing"
+#        elif "Cost_Question" in response["outcome"]["entities"] and "Drink" in response["outcome"]["entities"]:
+#            speak = "Sorry I don't do " + response["outcome"]["entities"]["Drink"]["value"]
+#        elif "Cost_Question" in response["outcome"]["entities"] and "Food" in response["outcome"]["entities"]:
+#            speak = "I don't serve food, sorry"
+#        elif "Here_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"] and "Future" in response["outcome"]["entities"]:
+#            speak = "I'd imagine I'll be here for a good while yet"
+#        elif "Here_Question" in response["outcome"]["entities"] and "Time_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+#            speak = "I've been here as long as I can remember... I'm not very old mind you"
+#        elif "Here_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+#            speak = "I'm here to server coffee.  And I'd like to think I bring a smile to peoples faces"
+#        elif "How_Question" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+#            speak = "I'm very well thankyou for asking.  Noone ever asks me how I am. Sad really"
+#        else:
+#            speak = "I'm sorry, I'm not quite sure how to answer that"
 
-    elif (response["outcome"]["intent"] == "plan"):
-        if "location" in response["outcome"]["entities"] and "contact" in response["outcome"]["entities"]:
-            "Have fun in " + response["outcome"]["entities"]["location"]["value"] + ", will " + response["outcome"]["entities"]["contact"]["value"] + " be there?"
-        elif "location" in response["outcome"]["entities"]:
-            speak = "Have fun in " + response["outcome"]["entities"]["location"]["value"]
-        elif "agenda_entry" in response["outcome"]["entities"]:
-            speak = "Enjoy your " + response["outcome"]["entities"]["agenda_entry"]["value"]
+#    elif (response["outcome"]["intent"] == "plan"):
+#        if "location" in response["outcome"]["entities"] and "contact" in response["outcome"]["entities"]:
+#            "Have fun in " + response["outcome"]["entities"]["location"]["value"] + ", will " + response["outcome"]["entities"]["contact"]["value"] + " be there?"
+#        elif "location" in response["outcome"]["entities"]:
+#            speak = "Have fun in " + response["outcome"]["entities"]["location"]["value"]
+#        elif "agenda_entry" in response["outcome"]["entities"]:
+#            speak = "Enjoy your " + response["outcome"]["entities"]["agenda_entry"]["value"]
+#    elif (response["outcome"]["intent"] == "statement"):
+#        if "Positive_Emotion" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+#            speak = "I feel the same"
+#        elif "Negative_Emotion" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
+#            speak = "That's not very nice is it"
+#        elif "Negative_Emotion" in response["outcome"]["entities"] and "datetime" in response["outcome"]["entities"]:
+#            speak = "If it makes you feel any better I'm having an awful day too"
+#        elif "Negative_Emotion" in response["outcome"]["entities"] and "Weather" in response["outcome"]["entities"]:
+#           speak = "I know right, isn't it just the worst"
+#        elif "Positive_Emotion" in response["outcome"]["entities"] and "Weather" in response["outcome"]["entities"]:
+#            speak = "It's amazing, I love it too"
+#        elif "Positive_Emotion" in response["outcome"]["entities"] and "datetime" in response["outcome"]["entities"]:
+#            speak = "It is one of the better days I've had"
+#        else:
+#            speak = "I think I need a hearing aid, I didn't quite catch that"
 
-    elif (response["outcome"]["intent"] == "statement"):
-        if "Positive_Emotion" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "I feel the same"
-        elif "Negative_Emotion" in response["outcome"]["entities"] and "Self" in response["outcome"]["entities"]:
-            speak = "That's not very nice is it"
-        elif "Negative_Emotion" in response["outcome"]["entities"] and "datetime" in response["outcome"]["entities"]:
-            speak = "If it makes you feel any better I'm having an awful day too"
-        elif "Negative_Emotion" in response["outcome"]["entities"] and "Weather" in response["outcome"]["entities"]:
-            speak = "I know right, isn't it just the worst"
-        elif "Positive_Emotion" in response["outcome"]["entities"] and "Weather" in response["outcome"]["entities"]:
-            speak = "It's amazing, I love it too"
-        elif "Positive_Emotion" in response["outcome"]["entities"] and "datetime" in response["outcome"]["entities"]:
-            speak = "It is one of the better days I've had"
-        else:
-            speak = "I think I need a hearing aid, I didn't quite catch that"
+#    elif (response["outcome"]["intent"] == "command"):
+#        if "Vulgar" in response["outcome"]["entities"]:
+#            speak = "I'll not be spoken to like that, please leave"
+#        elif "Please" in response["outcome"]["entities"] or "Polite" in response["outcome"]["entities"]:
+#            speak = "Thankyou for being polite, but i'd rather you not order me around"
+#        else:
+#            speak = "I'm not taking orders, ask me nicely"
 
-    elif (response["outcome"]["intent"] == "command"):
-        if "Vulgar" in response["outcome"]["entities"]:
-            speak = "I'll not be spoken to like that, please leave"
-        elif "Please" in response["outcome"]["entities"] or "Polite" in response["outcome"]["entities"]:
-            speak = "Thankyou for being polite, but i'd rather you not order me around"
-        else:
-            speak = "I'm not taking orders, ask me nicely"
+#    elif (response["outcome"]["intent"] == "affirmative"):
+#        speak = "Thanks, that's great news"
 
-    elif (response["outcome"]["intent"] == "affirmative"):
-        speak = "Thanks, that's great news"
+#    elif (response["outcome"]["intent"] == "negative"):
+#        speak = "I'm sorry"
 
-    elif (response["outcome"]["intent"] == "negative"):
-        speak = "I'm sorry"
+#    elif (response["outcome"]["intent"] == "emotion"):
+#        if "Positive_Emotion" in response["outcome"]["entities"]:
+#            speak = "That's great to hear"
+#        elif "Negative_Emotion" in response["outcome"]["entities"]:
+#            speak = "That's a shame, here, have a coffee to cheer you up"
 
-    elif (response["outcome"]["intent"] == "emotion"):
-        if "Positive_Emotion" in response["outcome"]["entities"]:
-            speak = "That's great to hear"
-        elif "Negative_Emotion" in response["outcome"]["entities"]:
-            speak = "That's a shame, here, have a coffee to cheer you up"
+#    elif (response["outcome"]["intent"] == "apology"):
+#        speak = "Don't worry about it, I'm used to it by now"
 
-    elif (response["outcome"]["intent"] == "apology"):
-        speak = "Don't worry about it, I'm used to it by now"
-
-    elif (response["outcome"]["intent"] == "good_bye"):
-        speak = "Bye!"
-        call(["espeak", "\"" + speak + "\""])
-        sys.exit(0)
-    else:
-        speak = "I'm sorry, I didn't catch that"
+#    elif (response["outcome"]["intent"] == "good_bye"):
+#        speak = "Bye!"
+#        call(["espeak", "\"" + speak + "\""])
+#        sys.exit(0)
+#    else:
+#        speak = "I'm sorry, I didn't catch that"
 
     print "Running speak: " + speak
+
     googleTTS(speak)
 
 FLAC_CONV = 'flac -f ' # We need a WAV to FLAC converter.
