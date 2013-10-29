@@ -114,6 +114,6 @@ def stt_google_wav(filename):
     map(os.remove, (filename+'.flac', filename+'.wav'))
     return res
 
-FLAC_CONV = 'flac -f ' # We need a WAV to FLAC converter.
+FLAC_CONV = 'flac -sf ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
     listen_for_speech()

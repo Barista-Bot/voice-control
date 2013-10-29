@@ -3,8 +3,6 @@ import wave
 import audioop
 from collections import deque 
 import os
-import urllib2
-import urllib
 import time
 
 def find_input_device(pyaudio):
@@ -52,7 +50,7 @@ def listen_for_block_of_speech():
     started = False
     finished = False
     
-    while (not Finished):
+    while (not finished):
         data = stream.read(chunk)
         slid_win.append (abs(audioop.avg(data, 2)))
         if(True in [ x>THRESHOLD for x in slid_win]):
@@ -85,11 +83,14 @@ def save_speech(data, p):
 
 def convert_wav_to_flac(filename):
 	os.system(FLAC_CONV+ filename+'.wav')
-	os.remove(filename)
+	os.remove(filename+'.wav')
 	flac_filename = filename+'.flac'
 	return flac_filename
 
 
 FLAC_CONV = 'flac -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
-    print(listen_for_block_of_speech())
+    # Unit test when module is run
+    filename = listen_for_block_of_speech()
+    os.system('mplayer ' + filename)
+    os.remove(filename)
