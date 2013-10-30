@@ -1,6 +1,8 @@
 import os
 import urllib2
 
+CONFIDENCE_VALUE = 0.9
+
 def stt_google_wav(filename):
 	
     f = open(os.path.join(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(filename))), filename),'rb')
@@ -15,7 +17,7 @@ def stt_google_wav(filename):
     try:
     	hypotheses = eval(p.read())['hypotheses']
     	print hypotheses
-    	if(float(hypotheses[0]['confidence']) > 0.9):
+    	if(float(hypotheses[0]['confidence']) > CONFIDENCE_VALUE):
     		res = hypotheses[0]['utterance']
     	else:
     		res = []
