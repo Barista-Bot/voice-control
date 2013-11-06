@@ -18,7 +18,7 @@ def witLookup(message):
 	try:
 		resultJSON = json.loads(storage.getvalue())
 		print resultJSON['outcome']['confidence']
-		if (float(resultJSON['outcome']['confidence']) > 0.9):
+		if (float(resultJSON['outcome']['confidence']) > 0.7):
 			return resultJSON['outcome']
 		else:
 			return []
