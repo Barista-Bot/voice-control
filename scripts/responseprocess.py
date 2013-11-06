@@ -113,16 +113,13 @@ def messageResponse(witResult):
 
 	elif (witResult["outcome"]["intent"] == "good_bye"):
 		response = "Bye!"
-		call(["espeak", "\"" + response + "\""])
-		sys.exit(0)
 	else:
 		response = "I'm sorry, I didn't catch that"
 
 	print "Running response: " + response
+  
 
-    googleTTS(response)
-
-	return witResult
+	return response
 
 if __name__ == '__main__':
 	fakeWitResult = { 'outcome' : {'intent' : "hello"}}
