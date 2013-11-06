@@ -3,27 +3,27 @@ def messageResponse(witResult):
 		response = "Hello there, it's nice to meet you, what's your name?"
 
 	if (witResult["outcome"]["intent"] == "hello"):
-        response = "Hello there, it's nice to meet you, what's your name?"
+		response = "Hello there, it's nice to meet you, what's your name?"
 
-    elif (witResult["outcome"]["intent"] == "name"):
-        if "contact" in witResult["outcome"]["entities"]:
-            response = "It's nice to meet you " + witResult["outcome"]["entities"]["contact"]["value"]
-        else:
-            response = "I'm sorry, I didn't catch your name"
+	elif (witResult["outcome"]["intent"] == "name"):
+        	if "contact" in witResult["outcome"]["entities"]:
+			response = "It's nice to meet you " + witResult["outcome"]["entities"]["contact"]["value"]
+		else:
+			response = "I'm sorry, I didn't catch your name"
 
-    elif (witResult["outcome"]["intent"] == "request"):
-        if "Coffee" in witResult["outcome"]["entities"]:
-            if "Polite" in witResult["outcome"]["entities"] or "Please" in witResult["outcome"]["entities"]:
-                response = "Of course you can have a " + witResult["outcome"]["entities"]["Coffee"]["value"]
-            else:
-               response = "Yes you can have a " + witResult["outcome"]["entities"]["Coffee"]["value"]
-        elif "Drink" in witResult["outcome"]["entities"]:
-            response = "Sorry, I don't do " + witResult["outcome"]["entities"]["Drink"]["value"]
-        elif "Food" in witResult["outcome"]["entities"]:
-            response = "Sorry, I don't do food"
-    
-        if "Random_Question" in witResult["outcome"]["entities"]:
-            response = "Now how am I supposed to know that!?"
+	elif (witResult["outcome"]["intent"] == "request"):
+		if "Coffee" in witResult["outcome"]["entities"]:
+			if "Polite" in witResult["outcome"]["entities"] or "Please" in witResult["outcome"]["entities"]:
+				response = "Of course you can have a " + witResult["outcome"]["entities"]["Coffee"]["value"]
+			else:
+				response = "Yes you can have a " + witResult["outcome"]["entities"]["Coffee"]["value"]
+	        elif "Drink" in witResult["outcome"]["entities"]:
+			response = "Sorry, I don't do " + witResult["outcome"]["entities"]["Drink"]["value"]
+		elif "Food" in witResult["outcome"]["entities"]:
+			response = "Sorry, I don't do food"    
+		elif "Random_Question" in witResult["outcome"]["entities"]:
+			response = "Now how am I supposed to know that!?"
+
 	elif witResult["outcome"]["intent"] == "Name_Question":
 		response = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Barry the Barista Bot"
 	
