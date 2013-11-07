@@ -8,7 +8,7 @@ def stt_google_wav(filename):
     f = open(os.path.join(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(filename))), filename),'rb')
     flac_cont = f.read()
     f.close()
-
+    os.remove(os.path.join(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(filename))), filename))
     lang_code='en-US'
     googl_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=6'%(lang_code)
     hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate=16000'}

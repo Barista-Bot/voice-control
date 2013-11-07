@@ -9,18 +9,29 @@ from googletext2speech import play_wav
 from user_identification import client
 
 from voice_control.srv import *
-import rospy, time, os
+import rospy, time, os, baristaDB
+
+DB_NAME = "baristaDB.db"
+CONFIDENCE_THRESHOLD = 40
 
 def identify_user():
 	waitingForUser = True
 
 	while waitingForUser:
 		print "looking for person"
+		global userID
+
 		person_result = client.queryPerson()
 		if person_result.is_person:
-			print "found someone"
-		else :
-			print "no luck"
+			if person_result.is_known_person and person_result.confidence > CONFIDENCE_THRESHOLD:
+				userID = person_result.id
+				client.definePerson(userID)
+			else:
+				baristaDB.OpenDatabase(DB_NAME)
+				userID = baristaDB.CreateNewUser()
+				baristaDB.CloseDatabase(DB_NAME)
+				client.definePerson(userID)
+		
 		waitingForUser = not person_result.is_person
 
 	return (person_result.is_person, person_result.is_known_person, person_result.id, person_result.confidence)
@@ -48,7 +59,8 @@ def begin_interaction():
 			else :
 				witResult = witLookup(hypothesis)
 				if not witResult == []:
-					responseString, finished = messageResponse(witResult)
+					global userID
+					responseString, finished = messageResponse(witResult, userID)
 				else:
 					responseString = "I'm sorry, I didnt understand what you said"
 		else:
@@ -93,4 +105,6 @@ def voice_control_server():
 	#		time.sleep(5)
 
 if __name__ == "__main__":
+	global userID
+	userID = 0
 	voice_control_server()

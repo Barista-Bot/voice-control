@@ -21,17 +21,18 @@ def dispense_coffee(response, coffee):
 
 def messageResponse(witResult, userId):
 	baristaDB.OpenDatabase(DatabaseName)
+	print "Got UserID " + str(userId) 
 	try:
 		finished = False
 
 		if (witResult["intent"] == "hello"):
-			if baristaDB.UserExists(userId) && baristaDB.GetUserName(userId) != "":
+			if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "":
 				response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId)
 			else:
 				response = "Hello there, it's a pleasure to meet you, what's your name?"
 
 		elif (witResult["intent"] == "name"):
-	        if "contact" in witResult["entities"]:
+			if "contact" in witResult["entities"]:
 				response = "It's nice to meet you " + witResult["entities"]["contact"]["value"]
 				baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])
 			else:
@@ -41,7 +42,7 @@ def messageResponse(witResult, userId):
 			if "Coffee" in witResult["entities"]:
 				if "Polite" in witResult["entities"] or "Please" in witResult["entities"]:
 					response = "Of course you can have a " + witResult["entities"]["Coffee"]["value"]
-					baristaDB.SetCoffeePreference(userId, witResult["entities"]["Coffee"]["value"])	
+					baristaDB.SetCoffeePreference(userId, witResult["entities"]["Coffee"]["value"])
 				else:
 					response = "Yes you can have a " + witResult["entities"]["Coffee"]["value"]
 					baristaDB.SetCoffeePreference(userId, witResult["entities"]["Coffee"]["value"])	
@@ -149,8 +150,7 @@ def messageResponse(witResult, userId):
 		print "Running response: " + response
 	except TypeError:
 		response = "I'm sorry, I didn't quite get that"
-	except KeyError:
-		response = "No, I'm sorry, I didn't get that"
+	
 	baristaDB.CloseDatabase(DatabaseName)
 	return (response, finished)
 

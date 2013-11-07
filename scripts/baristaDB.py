@@ -3,7 +3,7 @@ import os
 
 def OpenDatabase(filename):   
 	global CoffeeDatabase
-	CoffeeDatabase = shelve.open(filename, flag = 'c', writeback = True)
+	CoffeeDatabase = shelve.open(os.path.join(os.path.dirname(os.path.realpath(__file__)), filename), flag = 'c', writeback = True)
 
 def GetUserName(userId):
 	global CoffeeDatabase
