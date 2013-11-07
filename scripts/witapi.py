@@ -1,6 +1,8 @@
 from StringIO import StringIO
 import pycurl, urllib, json
 
+CONFIDENCE_VALUE = 0.65
+
 def witLookup(message):
 
 	message = urllib.quote(message)
@@ -18,7 +20,7 @@ def witLookup(message):
 	try:
 		resultJSON = json.loads(storage.getvalue())
 		print resultJSON['outcome']['confidence']
-		if (float(resultJSON['outcome']['confidence']) > 0.7):
+		if (float(resultJSON['outcome']['confidence']) > CONFIDENCE_VALUE):
 			return resultJSON['outcome']
 		else:
 			return []

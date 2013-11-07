@@ -1,7 +1,7 @@
 import os
 import urllib2
 
-CONFIDENCE_VALUE = 0.9
+CONFIDENCE_VALUE = 0.65
 
 def stt_google_wav(filename):
 	

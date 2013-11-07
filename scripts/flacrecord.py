@@ -64,6 +64,9 @@ def listen_for_block_of_speech():
             #reset all
             started = False
             finished = True
+        else:
+            all_m = []
+            all_m.append(data)
 
     stream.close()
     p.terminate()

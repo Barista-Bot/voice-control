@@ -35,12 +35,20 @@ def define_new_user():
 	return success
 
 def begin_interaction():
-	flac_file = listen_for_block_of_speech()
-	hypothesis = stt_google_wav(flac_file)
-	print hypothesis
-	witResult = witLookup(hypothesis)
-	responseString = messageResponse(witResult)
-	googleTTS(responseString)
+	finished = False
+	while not finished:
+		flac_file = listen_for_block_of_speech()
+		hypothesis = stt_google_wav(flac_file)
+		if not hypothesis == []:
+			print hypothesis
+			witResult = witLookup(hypothesis)
+			if not witResult == []:
+				responseString, finished = messageResponse(witResult)
+			else:
+				responseString = "I'm sorry, I didnt understand what you said"
+		else:
+			responseString = "I'm sorry, I didn't hear you"
+		googleTTS(responseString)
 
 def users_found(self):
 	foundPerson = False
