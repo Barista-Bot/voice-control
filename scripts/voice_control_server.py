@@ -4,11 +4,12 @@ from googlewebspeech import stt_google_wav
 from witapi import witLookup
 from responseprocess import messageResponse
 from googletext2speech import googleTTS
+from googletext2speech import play_wav
 
 from user_identification import client
 
 from voice_control.srv import *
-import rospy, time
+import rospy, time, os
 
 def identify_user():
 	waitingForUser = True
@@ -35,17 +36,21 @@ def define_new_user():
 	return success
 
 def begin_interaction():
+	global finished
 	finished = False
 	while not finished:
 		flac_file = listen_for_block_of_speech()
 		hypothesis = stt_google_wav(flac_file)
 		if not hypothesis == []:
 			print hypothesis
-			witResult = witLookup(hypothesis)
-			if not witResult == []:
-				responseString, finished = messageResponse(witResult)
-			else:
-				responseString = "I'm sorry, I didnt understand what you said"
+			if hypothesis.lower() == "what does the fox say":
+				play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
+			else :
+				witResult = witLookup(hypothesis)
+				if not witResult == []:
+					responseString, finished = messageResponse(witResult)
+				else:
+					responseString = "I'm sorry, I didnt understand what you said"
 		else:
 			responseString = "I'm sorry, I didn't hear you"
 		googleTTS(responseString)

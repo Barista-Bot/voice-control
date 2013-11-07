@@ -73,7 +73,7 @@ def listen_for_block_of_speech():
     return flac_filename
 
 def save_speech(data, p):
-    filename = 'output_'+str(int(time.time()))
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),'output_'+str(int(time.time())))
     # write data to WAVE file
     data = ''.join(data)
     wf = wave.open(filename+'.wav', 'wb')
