@@ -1,10 +1,11 @@
 import roslib; roslib.load_manifest('coffee_machine_control')
 
 import sys
-
+import baristaDB
 import rospy
 from coffee_machine_control.srv import *
 from googletext2speech import googleTTS
+DatabaseName = "baristaDB.db"
 
 def dispense_coffee(response, coffee):
 	googleTTS(response)
@@ -18,16 +19,21 @@ def dispense_coffee(response, coffee):
 	except rospy.ServiceException, e:
 	    print "Service call failed: %s"%e
 
-def messageResponse(witResult):
+def messageResponse(witResult, userId):
+	baristaDB.OpenDatabase(DatabaseName)
 	try:
 		finished = False
 
 		if (witResult["intent"] == "hello"):
-			response = "Hello there, it's a pleasure to meet you, what's your name?"
+			if baristaDB.UserExists(userId) && baristaDB.GetUserName(userId) != "":
+				response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId)
+			else:
+				response = "Hello there, it's a pleasure to meet you, what's your name?"
 
 		elif (witResult["intent"] == "name"):
-	        	if "contact" in witResult["entities"]:
+	        if "contact" in witResult["entities"]:
 				response = "It's nice to meet you " + witResult["entities"]["contact"]["value"]
+				baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])
 			else:
 				response = "I'm sorry, I didn't catch your name"
 
@@ -35,8 +41,10 @@ def messageResponse(witResult):
 			if "Coffee" in witResult["entities"]:
 				if "Polite" in witResult["entities"] or "Please" in witResult["entities"]:
 					response = "Of course you can have a " + witResult["entities"]["Coffee"]["value"]
+					baristaDB.SetCoffeePreference(userId, witResult["entities"]["Coffee"]["value"])	
 				else:
 					response = "Yes you can have a " + witResult["entities"]["Coffee"]["value"]
+					baristaDB.SetCoffeePreference(userId, witResult["entities"]["Coffee"]["value"])	
 				response = dispense_coffee(response, witResult["entities"]["Coffee"]["value"])
 			elif "Drink" in witResult["entities"]:
 				response = "Sorry, I don't do " + witResult["entities"]["Drink"]["value"]
@@ -143,7 +151,7 @@ def messageResponse(witResult):
 		response = "I'm sorry, I didn't quite get that"
 	except KeyError:
 		response = "No, I'm sorry, I didn't get that"
-
+	baristaDB.CloseDatabase(DatabaseName)
 	return (response, finished)
 
 if __name__ == '__main__':
