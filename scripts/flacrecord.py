@@ -30,7 +30,7 @@ def listen_for_block_of_speech():
     CHANNELS = 1
     RATE = 16000
     THRESHOLD = 180 #The threshold intensity that defines silence signal (lower than).
-    SILENCE_LIMIT = 2 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
+    SILENCE_LIMIT = 1 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
     #open stream
     p = pyaudio.PyAudio()
