@@ -19,6 +19,34 @@ def GetCoffeePreference(userId):
 	except:	
 		return ""
 
+def GetCourse(userId):
+	global CoffeeDatabase
+	try:
+		return CoffeeDatabase[str(userId)]["Course"]
+	except:
+		return ""
+
+def GetAgenda(userId):
+	global CoffeeDatabase
+	try:
+		return CoffeeDatabase[str(userId)]["Agenda"]
+	except:
+		return ""
+
+def GetWeather(userId):
+	global CoffeeDatabase
+	try:
+		return CoffeeDatabase[str(userId)]["Weather"]
+	except:
+		return ""
+
+def GetMood(userId):
+	global CoffeeDatabase
+	try:
+		return CoffeeDatabase[str(userId)]["Mood"]
+	except:
+		return ""
+
 def GetNumberUsers():
 	global CoffeeDatabase
 	return len(CoffeeDatabase)
@@ -33,7 +61,7 @@ def UserExists(userId):
 def CreateNewUser():
 	global CoffeeDatabase
 	userId = GetNumberUsers() + 1
-	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": ''}
+	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": ''}
 	return userId
 
 def SetUserName(userId, Name):
@@ -44,6 +72,27 @@ def SetUserName(userId, Name):
 def SetCoffeePreference(userId, CoffeePreference):
 	global CoffeeDatabase
 	CoffeeDatabase[str(userId)]["Coffee"] = CoffeePreference
+	CoffeeDatabase.sync()
+
+def SetCourse(userId, Course):
+	global CoffeeDatabase
+	CoffeeDatabase[str(userId)]["Course"] = Course
+	CoffeeDatabase.sync()
+
+def SetAgenda(userId, Agenda):
+	global CoffeeDatabase
+	CoffeeDatabase[str(userId)]["Agenda"] = Agenda
+	CoffeeDatabase.sync()
+
+def SetWeather(userId, Weather):
+	global CoffeeDatabase
+	CoffeeDatabase[str(userId)]["Weather"] = Weather
+	CoffeeDatabase.sync()
+
+def SetMood(userId, Mood):
+	global CoffeeDatabase
+	CoffeeDatabase[str(userId)]["Mood"] = Mood
+	CoffeeDatabase.sync()
 
 def ClearDatabase():
 	global CoffeeDatabase
@@ -77,6 +126,15 @@ if __name__ == '__main__':
 	print GetUserName(UId)
 	SetCoffeePreference(UId, 'MochaChocaLatta YA YA')
 	print GetCoffeePreference(UId)
+	SetCourse(UId, 'Electronic and Infomation Engineering')
+	print GetCourse(UId)
+	SetMood(UId, 'Happy')
+	print GetMood(UId)
+	SetWeather(UId, "Sunny")
+	print GetWeather(UId)
+	SetAgenda(UId, 'Studying Studying Studying')
+	print GetAgenda(UId)
+
 	CloseDatabase(DbTest)
 	OpenDatabase(DbTest)
 	print GetNumberUsers()
