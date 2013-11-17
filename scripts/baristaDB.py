@@ -1,9 +1,28 @@
 import shelve
 import os
+from datetime import datetime
 
 def OpenDatabase(filename):   
 	global CoffeeDatabase
 	CoffeeDatabase = shelve.open(os.path.join(os.path.dirname(os.path.realpath(__file__)), filename), flag = 'c', writeback = True)
+
+def CreateNewUser():
+	global CoffeeDatabase
+	userId = GetNumberUsers() + 1
+	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": ''}
+	return userId
+
+def GetNumberUsers():
+	global CoffeeDatabase
+	return len(CoffeeDatabase)
+
+def UserExists(userId):
+	global CoffeeDatabase
+	#print str(datetime.now())
+	if str(userId) in CoffeeDatabase.keys():
+		return True
+	else:
+		return False
 
 def GetUserName(userId):
 	global CoffeeDatabase
@@ -47,22 +66,12 @@ def GetMood(userId):
 	except:
 		return ""
 
-def GetNumberUsers():
+def GetTime(userId):
 	global CoffeeDatabase
-	return len(CoffeeDatabase)
-
-def UserExists(userId):
-	global CoffeeDatabase
-	if str(userId) in CoffeeDatabase.keys():
-		return True
-	else:
-		return False
-
-def CreateNewUser():
-	global CoffeeDatabase
-	userId = GetNumberUsers() + 1
-	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": ''}
-	return userId
+	try:
+		return CoffeeDatabase[str(userId)]["Time"]
+	except:
+		return ""
 
 def SetUserName(userId, Name):
 	global CoffeeDatabase
@@ -92,6 +101,11 @@ def SetWeather(userId, Weather):
 def SetMood(userId, Mood):
 	global CoffeeDatabase
 	CoffeeDatabase[str(userId)]["Mood"] = Mood
+	CoffeeDatabase.sync()
+
+def SetTime(userId):
+	global CoffeeDatabase
+	CoffeeDatabase[str(userId)]["Time"] = str(datetime.now())
 	CoffeeDatabase.sync()
 
 def ClearDatabase():
@@ -130,10 +144,13 @@ if __name__ == '__main__':
 	print GetCourse(UId)
 	SetMood(UId, 'Happy')
 	print GetMood(UId)
-	SetWeather(UId, "Sunny")
+	SetWeather(UId, "Cloudy with a Chance of Meatballs")
 	print GetWeather(UId)
 	SetAgenda(UId, 'Studying Studying Studying')
 	print GetAgenda(UId)
+	SetTime(UId)
+	print GetTime(UId)
+
 
 	CloseDatabase(DbTest)
 	OpenDatabase(DbTest)

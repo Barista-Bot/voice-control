@@ -28,6 +28,15 @@ def messageResponse(witResult, userId):
 		if (witResult["intent"] == "hello"):
 			if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "":
 				response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId)
+				#test code
+				if baristaDB.GetCourse(userId) != "":
+					response += "Last time you mentioned you were studying" + baristaDB.GetCourse(userId)
+					response += "How is that going, is it hard?"
+				if baristaDB.GetTime(userId) != "":
+					#Would be cool to put in something sick like checking how long it was since they were last seen and then saying I've not seen you since x day!
+					response += "It's been a while since I last saw you, how have you been?"					
+
+					
 			else:
 				response = "Hello there, it's a pleasure to meet you, what's your name?"
 
@@ -47,15 +56,17 @@ def messageResponse(witResult, userId):
 					response = "Yes you can have a " + witResult["entities"]["Coffee"]["value"]
 					baristaDB.SetCoffeePreference(userId, witResult["entities"]["Coffee"]["value"])	
 				response = dispense_coffee(response, witResult["entities"]["Coffee"]["value"])
+				#THIS IS JUST A TEST - EVANS take a look please
+				response = "Whilst you're waiting for your coffee.. - May I ask what you are studying?"
 			elif "Drink" in witResult["entities"]:
 				response = "Sorry, I don't do " + witResult["entities"]["Drink"]["value"]
 			elif "Food" in witResult["entities"]:
-				response = "Sorry, I don't do food"    
+				response = "Sorry, I don't do food, are there any coffees I can offer you?"    
 			elif "Random_Question" in witResult["entities"]:
 				response = "Now how am I supposed to know that!?"
 
 		elif witResult["intent"] == "name_question":
-			response = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Barry the Barista Bot"
+			response = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Beryl the Barista Bot"
 		
 		elif witResult["intent"] == "product_question":
 			if "Coffee" in witResult["entities"]: 
@@ -63,7 +74,7 @@ def messageResponse(witResult, userId):
 			elif "Food" in witResult["entities"]: 
 				response = "Mate, I'm a bloody coffee machine - I don't serve food... nope, not even those little coffee biscuits"
 			elif "Drink" in witResult["entities"]:
-				response = "Sorry, unfortunately I only serve Coffee - I'd love it if I could serve Beer, but unfortunately I couldn't get a liquor licence..."
+				response = "Sorry, unfortunately I only serve Coffee - I'd love it if I could serve Beer, but unfortunately I couldn't get a liquor licence... - you could turn this into an Irish coffee though..."
 
 		elif(witResult["intent"] == "feeling_question"):
 			if "Self" in witResult["entities"]:
@@ -73,7 +84,15 @@ def messageResponse(witResult, userId):
 				response = "That's sad to hear - perhaps a coffee would make you feel better?"
 			elif "Positive_Emotion" in witResult["entities"]:
 				response = "You know what might make it even better - a coffee!"
-		
+
+		elif(witResult["intent"] == "course_statement"):
+			if "course" in witResult["entities"]:
+				response = "Oh that sounds really interesting - are you enjoying" + witResult["entities"]["course"]["value"]
+				baristaDB.SetCourse(userId, witResult["entities"]["course"]["value"])
+			else:
+				response = "I'm sorry what did you say you studied?"
+
+
 	#        elif "Coffee_Question" in witResult["entities"] and "Self" in witResult["entities"]:
 	#            response = "I do espresso, Cappuccino and Mocha"
 	#        elif "Coffee_Question" in witResult["entities"]:
