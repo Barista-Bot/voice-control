@@ -1,15 +1,17 @@
 import shelve
 import os
+import rospkg
 from datetime import datetime
+#level of interaction
 
-def OpenDatabase(filename):   
+def OpenDatabase(file_path):   
 	global CoffeeDatabase
-	CoffeeDatabase = shelve.open(os.path.join(os.path.dirname(os.path.realpath(__file__)), filename), flag = 'c', writeback = True)
+	CoffeeDatabase = shelve.open(file_path, flag = 'c', writeback = True)
 
 def CreateNewUser():
 	global CoffeeDatabase
 	userId = GetNumberUsers() + 1
-	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": ''}
+	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": '', "Visit": '0'}
 	return userId
 
 def GetNumberUsers():
@@ -18,11 +20,17 @@ def GetNumberUsers():
 
 def UserExists(userId):
 	global CoffeeDatabase
-	#print str(datetime.now())
 	if str(userId) in CoffeeDatabase.keys():
 		return True
 	else:
 		return False
+
+def GetNumberVisits(userId):
+	global CoffeeDatabase
+	try:
+		return CoffeeDatabase[str(userId)]["Visit"]
+	except:
+		return ""
 
 def GetUserName(userId):
 	global CoffeeDatabase
@@ -108,18 +116,24 @@ def SetTime(userId):
 	CoffeeDatabase[str(userId)]["Time"] = str(datetime.now())
 	CoffeeDatabase.sync()
 
+def IncrementNumVisits(userId):
+	global CoffeeDatabase
+	temp = CoffeeDatabase[str(userId)]["Visit"]
+	CoffeeDatabase[str(userId)]["Visit"] = str(int(temp)+1)
+	CoffeeDatabase.sync()
+
 def ClearDatabase():
 	global CoffeeDatabase
 	CoffeeDatabase.clear() 
 	CoffeeDatabase.sync()
 
-def CloseDatabase(DbName):
+def CloseDatabase(file_path):
 	global CoffeeDatabase
 	numberUsers = GetNumberUsers()
 	try:
 		CoffeeDatabase.close()
 		if numberUsers == 0:
-			os.remove(DbName)
+			os.remove(file_path)
 	except Exception, e:
 		print e
 
@@ -127,7 +141,8 @@ def CloseDatabase(DbName):
 
 if __name__ == '__main__':
 	DbTest = 'DbTest.db'
-	OpenDatabase(DbTest)
+	file_path = os.path.join(rospkg.get_ros_home(), DbTest)
+	OpenDatabase(file_path)
 	print GetNumberUsers()
 	print UserExists(1)
 	UId = CreateNewUser()
@@ -135,6 +150,9 @@ if __name__ == '__main__':
 	print GetUserName(UId)
 	print GetCoffeePreference(UId)
 	print GetNumberUsers()
+	print "Get Num Visits"
+	IncrementNumVisits(UId)
+	print GetNumberVisits(UId)
 	print UserExists(UId)
 	SetUserName(UId, 'Frederico')
 	print GetUserName(UId)
@@ -152,12 +170,12 @@ if __name__ == '__main__':
 	print GetTime(UId)
 
 
-	CloseDatabase(DbTest)
-	OpenDatabase(DbTest)
+	CloseDatabase(file_path)
+	OpenDatabase(file_path)
 	print GetNumberUsers()
 	ClearDatabase()
 	print GetNumberUsers()
-	CloseDatabase(DbTest)
+	CloseDatabase(file_path)
 
 
 

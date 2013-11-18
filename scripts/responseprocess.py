@@ -7,6 +7,8 @@ from coffee_machine_control.srv import *
 from googletext2speech import googleTTS
 DatabaseName = "baristaDB.db"
 
+## Out of coffee and update order
+## Successful please take a cup put it under nozzle push the button and please be careful the coffee is hot. 
 def dispense_coffee(response, coffee):
 	googleTTS(response)
 	googleTTS("I will just pour you one now")
@@ -59,22 +61,22 @@ def messageResponse(witResult, userId):
 				#THIS IS JUST A TEST - EVANS take a look please
 				response = "Whilst you're waiting for your coffee.. - May I ask what you are studying?"
 			elif "Drink" in witResult["entities"]:
-				response = "Sorry, I don't do " + witResult["entities"]["Drink"]["value"]
+				response = "Sorry, I don't have " + witResult["entities"]["Drink"]["value"]
 			elif "Food" in witResult["entities"]:
-				response = "Sorry, I don't do food, are there any coffees I can offer you?"    
+				response = "Sorry, I don't offer food, are there any coffees I can offer you?"    
 			elif "Random_Question" in witResult["entities"]:
 				response = "Now how am I supposed to know that!?"
 
 		elif witResult["intent"] == "name_question":
-			response = "What an interesting question.  You know I've never really thought about that.  I just don't know.  From this day forth I shall be known as Beryl the Barista Bot"
+			response = "My name is Barista Bot and I am an automatic coffee serving robot"
 		
 		elif witResult["intent"] == "product_question":
 			if "Coffee" in witResult["entities"]: 
-				response = "We have Coffee X, Coffee Y and Coffee Z"
+				response = "I serve espresso, Vanilla Latte, Caramel Latte, Mocha"
 			elif "Food" in witResult["entities"]: 
-				response = "Mate, I'm a bloody coffee machine - I don't serve food... nope, not even those little coffee biscuits"
+				response = "Unfortunately, I don't serve food."
 			elif "Drink" in witResult["entities"]:
-				response = "Sorry, unfortunately I only serve Coffee - I'd love it if I could serve Beer, but unfortunately I couldn't get a liquor licence... - you could turn this into an Irish coffee though..."
+				response = "Sorry, unfortunately I only serve Coffee."
 
 		elif(witResult["intent"] == "feeling_question"):
 			if "Self" in witResult["entities"]:
