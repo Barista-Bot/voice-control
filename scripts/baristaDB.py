@@ -127,7 +127,7 @@ def SetTime(userId):
 
 def SetInteractionLevel(userId):
 	global CoffeeDatabase
-	level = ((userId-1) % 4)
+	level = ((userId-1) % 1)
 	CoffeeDatabase[str(userId)]["Level"] = str(level)
 	CoffeeDatabase.sync()
 
