@@ -95,7 +95,7 @@ def users_found(self):
 
 	begin_interaction()
  
-	return known_person
+	return True
 
 
 def voice_control_server():

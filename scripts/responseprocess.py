@@ -58,6 +58,7 @@ def messageResponse(witResult, userId):
 				if confirm:
 					response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 				else:
+					finished = True
 					response = "Unfortunately I can only offer you coffee, I hope you have a nice day - Good Bye"
 			elif "Coffee" in witResult["entities"]:
 				if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
