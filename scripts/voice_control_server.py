@@ -23,7 +23,7 @@ def identify_user():
 
 		person_result = client.queryPerson()
 		if person_result.is_person:
-			if person_result.is_known_person and person_result.confidence > CONFIDENCE_THRESHOLD:
+			if person_result.is_known_person:
 				userID = person_result.id
 				client.definePerson(userID)
 			else:
@@ -33,18 +33,6 @@ def identify_user():
 				client.definePerson(userID)
 		
 		waitingForUser = not person_result.is_person
-
-	return (person_result.is_person, person_result.is_known_person, person_result.id, person_result.confidence)
-
-def define_new_user():
-	global userCount
-	success = client.definePerson(userCount)
-	userCount += 1
-	if success:
-		print "Success!"
-	else :
-		print "Sad face"
-	return success
 
 def begin_interaction():
 	global finished
@@ -97,19 +85,8 @@ def begin_interaction():
 			googleTTS(responseString)
 
 def users_found(self):
-	foundPerson = False
-	while not foundPerson:
-		is_person, known_person, user_id, confidence = identify_user()
 
-		if is_person:
-			foundPerson = True
-
-			if known_person:
-				print "Known %d %.3f" % (user_id, confidence)
-
-			if not known_person or (confidence < 0.3):
-				print "added someone new!"
-				define_new_user()
+	identify_user()
 
 	print "Beginning Interaction"
 
