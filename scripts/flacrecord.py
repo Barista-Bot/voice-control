@@ -1,7 +1,8 @@
 import pyaudio
 import wave
 import audioop
-from collections import deque 
+from collections import deque
+from googletext2speech import play_wav
 import os
 import time
 
@@ -22,6 +23,20 @@ def find_input_device(pyaudio):
 
         return device_index
 
+def calibrate_input_threshold(audioStream, chunk):
+	print "Calibrating audio stream threshold"
+	currentMaximum = 0
+	for i in range(1,10):
+		data = audioStream.read(chunk)
+        soundLevel = abs(audioop.avg(data, 2))
+        if soundLevel > currentMaximum:
+        	currentMaximum = soundLevel
+	if currentMaximum < 100:
+		currentMaximum += 100
+	print "Setting calibration level to " + str(currentMaximum)
+	return currentMaximum
+
+
 def listen_for_block_of_speech():
 
     #config
@@ -29,7 +44,6 @@ def listen_for_block_of_speech():
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 16000
-    THRESHOLD = 180 #The threshold intensity that defines silence signal (lower than).
     SILENCE_LIMIT = 1 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
     #open stream
@@ -42,6 +56,8 @@ def listen_for_block_of_speech():
                     input_device_index = find_input_device(p),
                     frames_per_buffer = chunk)
 
+    THRESHOLD = calibrate_input_threshold(stream, chunk)
+
     all_m = []
     data = ''
     SILENCE_LIMIT = 2
@@ -49,6 +65,8 @@ def listen_for_block_of_speech():
     slid_win = deque(maxlen=SILENCE_LIMIT*rel)
     started = False
     finished = False
+
+    play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
     
     while (not finished):
         data = stream.read(chunk)
@@ -67,6 +85,8 @@ def listen_for_block_of_speech():
         else:
             all_m = []
             all_m.append(data)
+
+    play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
 
     stream.close()
     p.terminate()
