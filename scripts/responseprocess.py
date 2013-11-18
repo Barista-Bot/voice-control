@@ -1,4 +1,5 @@
 import roslib; roslib.load_manifest('coffee_machine_control')
+from flacrecord import listen_for_block_of_speech
 from googlewebspeech import stt_google_wav
 from witapi import witLookup
 from googletext2speech import googleTTS
@@ -7,25 +8,24 @@ import sys
 import baristaDB
 import rospy
 from coffee_machine_control.srv import *
-from googletext2speech import googleTTS
 DatabaseName = "baristaDB.db"
 
 ## Out of coffee and update order
 ## Successful please take a cup put it under nozzle push the button and please be careful the coffee is hot. 
-def dispense_coffee(response, coffee):
-	googleTTS(response)
-	googleTTS("I will just pour you one now")
-	rospy.wait_for_service('coffee_machine')
-	coffee_machine_control = rospy.ServiceProxy('coffee_machine', coffee_machine)
+def dispense_coffee(coffee):
+	#rospy.wait_for_service('coffee_machine')
+	#coffee_machine_control = rospy.ServiceProxy('coffee_machine', coffee_machine)
 	try:
-	    resp = coffee_machine_control(coffee)
-	    print resp
-	    return "There you go, enjoy your " + coffee
+	    #resp = coffee_machine_control(coffee)
+	    #print resp
+	    googleTTS("Take a cup, place it under the nozzle and push the button - be careful the coffee will be hot!")
+	    return "Let me know when you're done"
 	except rospy.ServiceException, e:
 	    print "Service call failed: %s"%e
+	    return "I'm sorry, something's gone wrong.  Please tell the Barista Bot team"
 
 def validCoffeeChoice(coffeeType):
-	for Type in ["caramel latte", "mocha", "vanilla latte", "espresso"]
+	for Type in ["caramel", "mocha", "vanilla", "espresso"]:
 		if Type in coffeeType.lower():
 			return True
 	return False	
@@ -46,7 +46,7 @@ def messageResponse(witResult, userId):
 	baristaDB.OpenDatabase(DatabaseName)
 	
 	print "Got UserID " + str(userId) 
-	level = GetInteractionLevel(userId)
+	level = baristaDB.GetInteractionLevel(userId)
 	
 	finished = False
 	try:
@@ -57,7 +57,7 @@ def messageResponse(witResult, userId):
 				confirm = confirmation(response)
 				if confirm:
 					response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
-				else
+				else:
 					response = "Unfortunately I can only offer you coffee, I hope you have a nice day - Good Bye"
 			elif "Coffee" in witResult["entities"]:
 				if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
@@ -66,16 +66,16 @@ def messageResponse(witResult, userId):
 					if confirm:
 						coffee_request = witResult["entities"]["Coffee"]["value"]
 						baristaDB.SetCoffeePreference(userId, coffee_request)
-						response = "Take a cup, place it under the nozzle and push the button - be careful the coffee will be hot!"
-						googleTTS(response)
-						finished = True
-						response = dispense_coffee(response, coffee_request)
+						response = dispense_coffee(coffee_request)
 
-					else
+					else:
 						response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
-				else
+				else:
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha.  Would you like a coffee?"
-			else
+			elif "Finished" in witResult["entities"]:
+				finished = True
+				response = "That's great.  Goodbye"
+			else:
 				response = "I'm sorry, could you repeat that?"
 
 		elif (level == 1):
