@@ -2,11 +2,12 @@ import shelve
 import os
 import rospkg
 from datetime import datetime
-#level of interaction
+
 
 def OpenDatabase(file_path):   
 	global CoffeeDatabase
-	CoffeeDatabase = shelve.open(file_path, flag = 'c', writeback = True)
+	path = os.path.join(rospkg.get_ros_home(), file_path)
+	CoffeeDatabase = shelve.open(path, flag = 'c', writeback = True)
 
 def CreateNewUser():
 	global CoffeeDatabase
@@ -156,8 +157,7 @@ def CloseDatabase(file_path):
 
 if __name__ == '__main__':
 	DbTest = 'DbTest.db'
-	file_path = os.path.join(rospkg.get_ros_home(), DbTest)
-	OpenDatabase(file_path)
+	OpenDatabase(DbTest)
 	print "Get number of users should be 0"
 	print GetNumberUsers()
 	print "Check user 1 exists - should be false"
