@@ -44,6 +44,7 @@ def listen_for_block_of_speech():
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 16000
+    PRE_SAMPLES = 10
     SILENCE_LIMIT = 1 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
     #open stream
@@ -83,8 +84,9 @@ def listen_for_block_of_speech():
             started = False
             finished = True
         else:
-            all_m = []
-            all_m.append(data)
+			if len(all_m) > PRE_SAMPLES:
+				all_m.pop(0)
+			all_m.append(data)
 
     play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
 
