@@ -11,7 +11,9 @@ def OpenDatabase(file_path):
 def CreateNewUser():
 	global CoffeeDatabase
 	userId = GetNumberUsers() + 1
-	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": '', "Visit": '0'}
+	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": '', "Visit": '1', "Level": ''}
+	SetInteractionLevel(userId)
+	CoffeeDatabase.sync()
 	return userId
 
 def GetNumberUsers():
@@ -28,7 +30,7 @@ def UserExists(userId):
 def GetNumberVisits(userId):
 	global CoffeeDatabase
 	try:
-		return CoffeeDatabase[str(userId)]["Visit"]
+		return int(CoffeeDatabase[str(userId)]["Visit"])
 	except:
 		return ""
 
@@ -81,6 +83,13 @@ def GetTime(userId):
 	except:
 		return ""
 
+def GetInteractionLevel(userId):
+	global CoffeeDatabase
+	try:
+		return int(CoffeeDatabase[str(userId)]["Level"])
+	except:
+		return ""
+
 def SetUserName(userId, Name):
 	global CoffeeDatabase
 	CoffeeDatabase[str(userId)]["Name"] = Name
@@ -116,6 +125,12 @@ def SetTime(userId):
 	CoffeeDatabase[str(userId)]["Time"] = str(datetime.now())
 	CoffeeDatabase.sync()
 
+def SetInteractionLevel(userId):
+	global CoffeeDatabase
+	level = ((userId-1) % 4)
+	CoffeeDatabase[str(userId)]["Level"] = str(level)
+	CoffeeDatabase.sync()
+
 def IncrementNumVisits(userId):
 	global CoffeeDatabase
 	temp = CoffeeDatabase[str(userId)]["Visit"]
@@ -143,29 +158,45 @@ if __name__ == '__main__':
 	DbTest = 'DbTest.db'
 	file_path = os.path.join(rospkg.get_ros_home(), DbTest)
 	OpenDatabase(file_path)
+	print "Get number of users should be 0"
 	print GetNumberUsers()
+	print "Check user 1 exists - should be false"
 	print UserExists(1)
 	UId = CreateNewUser()
+	print "New user ID should be 1"
 	print UId
+	print "Check User 1 exists should be true"
+	print UserExists(UId)
+	print "Interaction Level ="
+	print GetInteractionLevel(UId)
+	print "User name - should be blank"
 	print GetUserName(UId)
+	print "Coffee Preference - should be blank"
 	print GetCoffeePreference(UId)
+	print "GetNumberUsers - should be 1"
 	print GetNumberUsers()
-	print "Get Num Visits"
+	print "Get Num Visits of user 1 - should be 2"
 	IncrementNumVisits(UId)
 	print GetNumberVisits(UId)
-	print UserExists(UId)
+	print "Set and Get User Name"
 	SetUserName(UId, 'Frederico')
 	print GetUserName(UId)
+	print "Set and Get Coffee Preference"
 	SetCoffeePreference(UId, 'MochaChocaLatta YA YA')
 	print GetCoffeePreference(UId)
+	print "Set and Get Course Name"
 	SetCourse(UId, 'Electronic and Infomation Engineering')
 	print GetCourse(UId)
+	print "Set and Get Mood"
 	SetMood(UId, 'Happy')
 	print GetMood(UId)
+	print "Set and Get Weather"
 	SetWeather(UId, "Cloudy with a Chance of Meatballs")
 	print GetWeather(UId)
+	print "Set and get Agenda"
 	SetAgenda(UId, 'Studying Studying Studying')
 	print GetAgenda(UId)
+	print "Set and get Time"
 	SetTime(UId)
 	print GetTime(UId)
 
