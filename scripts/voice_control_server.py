@@ -19,12 +19,15 @@ def identify_user():
 
 	while waitingForUser:
 		print "looking for person"
-		global userID
+		global userID, interactionLevel
 
 		person_result = client.queryPerson()
 		if person_result.is_person:
 			if person_result.is_known_person:
 				userID = person_result.id
+				baristaDB.OpenDatabase(DB_NAME)
+				baristaDB.IncrementNumVisits(userID)
+				baristaDB.CloseDatabase(DB_NAME)
 				client.definePerson(userID)
 			else:
 				baristaDB.OpenDatabase(DB_NAME)
@@ -105,12 +108,8 @@ def voice_control_server():
 
 	rospy.spin()
 
-	#while(True):
-	#	if not interacting:
-	#		googletext2speech.googleTTS('Hello! Get your coffee here!')
-	#		time.sleep(5)
-
 if __name__ == "__main__":
-	global userID
+	global userID, interactionLevel
 	userID = 0
+	interactionLevel = 0
 	voice_control_server()
