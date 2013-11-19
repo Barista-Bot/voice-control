@@ -149,7 +149,7 @@ def CloseDatabase(file_path):
 	try:
 		CoffeeDatabase.close()
 		if numberUsers == 0:
-			os.remove(file_path)
+			os.remove(os.path.join(rospkg.get_ros_home(), file_path))
 	except Exception, e:
 		print e
 
@@ -201,12 +201,12 @@ if __name__ == '__main__':
 	print GetTime(UId)
 
 
-	CloseDatabase(file_path)
-	OpenDatabase(file_path)
+	CloseDatabase(DbTest)
+	OpenDatabase(DbTest)
 	print GetNumberUsers()
 	ClearDatabase()
 	print GetNumberUsers()
-	CloseDatabase(file_path)
+	CloseDatabase(DbTest)
 
 
 

@@ -50,6 +50,9 @@ def messageResponse(witResult, userId):
 	
 	finished = False
 	try:
+
+#************************************** LEVEL 0  ****************************************
+
 		if (level == 0):
 
 			if (witResult["intent"] == "hello"):
@@ -79,14 +82,56 @@ def messageResponse(witResult, userId):
 			else:
 				response = "I'm sorry, could you repeat that?"
 
-		elif (level == 1):
-			finished = False
-			finished = True
 
+#************************************** LEVEL 1  ****************************************
+
+
+		elif (level == 1):
+			
+			if (witResult["intent"] == "hello"):
+				response = "Hi, I'm Barista Bot - what's your name?" 
+			
+			elif (witResult["intent"] == "name"):			
+				if "contact" in witResult["entities"]:
+					response = "It's nice to meet you " + witResult["entities"]["contact"]["value"] + "would you like a coffee?"
+					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])
+					confirm = confirmation(response)
+					if confirm:
+						response = "Today" + baristaDB.GetUserName(userId) + " we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+					else:
+						finished = True
+						response = "Unfortunately I only offer coffee, I hope you have a nice day" + baristaDB.GetUserName(userId) + "Good Bye"
+				else:
+					response = "I'm sorry, I didn't catch your name"
+
+			elif "Coffee" in witResult["entities"]:
+				if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
+					response = baristaDB.GetUserName(userId) + "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " are you sure?"
+					confirm = confirmation(response)
+					if confirm:
+
+						coffee_request = witResult["entities"]["Coffee"]["value"]
+						baristaDB.SetCoffeePreference(userId, coffee_request)
+						response = dispense_coffee(coffee_request)
+
+					else:
+						response = baristaDB.GetUserName(userId) + " we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+				else:
+					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"		
+			
+			elif "Finished" in witResult["entities"]:
+				finished = True
+				response = "That's great.  Goodbye"
+			else:
+				response = "I'm sorry, could you repeat that?"
+
+
+			finished = True
+#************************************** LEVEL 2  ****************************************
 		elif (level == 2):
 			finished = False
 			finished = True
-
+#************************************** LEVEL 3  ****************************************
 		else:	
 			finished = False
 			finished = True
