@@ -125,8 +125,6 @@ def messageResponse(witResult, userId):
 			else:
 				response = "I'm sorry, could you repeat that?"
 
-
-			finished = True
 #************************************** LEVEL 2  ****************************************
 		elif (level == 2):
 			finished = False
