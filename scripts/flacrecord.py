@@ -10,11 +10,11 @@ def find_input_device(pyaudio):
         device_index = None            
         for i in range( pyaudio.get_device_count() ):     
             devinfo = pyaudio.get_device_info_by_index(i)   
-            print( "Device %d: %s"%(i,devinfo["name"]) )
+            #print( "Device %d: %s"%(i,devinfo["name"]) )
 
-            for keyword in ["mic","input"]:
+            for keyword in ["primesense","input"]:
                 if keyword in devinfo["name"].lower():
-                    print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
+                    #print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
                     device_index = i
                     return device_index
 
@@ -32,7 +32,7 @@ def calibrate_input_threshold(audioStream, chunk):
         if soundLevel > currentMaximum:
         	currentMaximum = soundLevel
 	if currentMaximum < 100:
-		currentMaximum += 100
+		currentMaximum += 70
 	print "Setting calibration level to " + str(currentMaximum)
 	return currentMaximum
 

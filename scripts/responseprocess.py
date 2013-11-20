@@ -63,20 +63,21 @@ def messageResponse(witResult, userId):
 				else:
 					finished = True
 					response = "Unfortunately I can only offer you coffee, I hope you have a nice day - Good Bye"
-			elif "Coffee" in witResult["entities"]:
-				if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-					response = "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " are you sure?"
-					confirm = confirmation(response)
-					if confirm:
-						coffee_request = witResult["entities"]["Coffee"]["value"]
-						baristaDB.SetCoffeePreference(userId, coffee_request)
-						response = dispense_coffee(coffee_request)
+			elif(witResult["intent"] == "request"):
+				if "Coffee" in witResult["entities"]:
+					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
+						response = "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " are you sure?"
+						confirm = confirmation(response)
+						if confirm:
+							coffee_request = witResult["entities"]["Coffee"]["value"]
+							baristaDB.SetCoffeePreference(userId, coffee_request)
+							response = dispense_coffee(coffee_request)
 
-					else:
-						response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+						else:
+							response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 				else:
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha.  Would you like a coffee?"
-			elif "Finished" in witResult["entities"]:
+			elif (witResult["intent"] == "finished"):
 				finished = True
 				response = "That's great.  Goodbye"
 			else:
@@ -89,39 +90,37 @@ def messageResponse(witResult, userId):
 		elif (level == 1):
 			
 			if (witResult["intent"] == "hello"):
-				response = "Hi, I'm Barista Bot - what's your name?" 
+				response = "Hi, I'm Barista Bot.  What's your name?" 
 			
 			elif (witResult["intent"] == "name"):			
 				if "contact" in witResult["entities"]:
-					response = "It's nice to meet you " + witResult["entities"]["contact"]["value"] + "would you like a coffee?"
+					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". would you like a coffee?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])
 					confirm = confirmation(response)
 					if confirm:
-						response = "Today" + baristaDB.GetUserName(userId) + " we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 					else:
 						finished = True
-						response = "Unfortunately I only offer coffee, I hope you have a nice day" + baristaDB.GetUserName(userId) + "Good Bye"
+						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 				else:
 					response = "I'm sorry, I didn't catch your name"
-
-			elif "Coffee" in witResult["entities"]:
-				if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-					response = baristaDB.GetUserName(userId) + "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " are you sure?"
-					confirm = confirmation(response)
-					if confirm:
-
-						coffee_request = witResult["entities"]["Coffee"]["value"]
-						baristaDB.SetCoffeePreference(userId, coffee_request)
-						response = dispense_coffee(coffee_request)
-
-					else:
-						response = baristaDB.GetUserName(userId) + " we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+			elif (witResult["intent"] == "request"):
+				if "Coffee" in witResult["entities"]:
+					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
+						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
+						confirm = confirmation(response)
+						if confirm:
+							coffee_request = witResult["entities"]["Coffee"]["value"]
+							baristaDB.SetCoffeePreference(userId, coffee_request)
+							response = dispense_coffee(coffee_request)
+						else:
+							response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 				else:
-					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"		
-			
-			elif "Finished" in witResult["entities"]:
+					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
+				
+			elif (witResult["intent"] == "finished"):
 				finished = True
-				response = "That's great.  Goodbye"
+				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 				response = "I'm sorry, could you repeat that?"
 
@@ -134,12 +133,16 @@ def messageResponse(witResult, userId):
 			finished = False
 			finished = True
 
+#************************************ ALL LEVELS **************************************
+
 		if (witResult["intent"] == "good_bye"):
 				finished = True
 				response = "Bye!"
 		
 	except TypeError:
 		response = "I'm sorry, I didn't quite get that"
+	except SyntaxError:
+		response = "Could you repeat that please?"
 	
 	baristaDB.CloseDatabase(DatabaseName)
 	return (response, finished)

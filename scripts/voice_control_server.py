@@ -27,11 +27,13 @@ def identify_user():
 				userID = person_result.id
 				baristaDB.OpenDatabase(DB_NAME)
 				baristaDB.IncrementNumVisits(userID)
+				print "Found existing person userID: " + str(userID) + " Level: " + str(baristaDB.GetInteractionLevel(userID))
 				baristaDB.CloseDatabase(DB_NAME)
 				client.definePerson(userID)
 			else:
 				baristaDB.OpenDatabase(DB_NAME)
 				userID = baristaDB.CreateNewUser()
+				print "Created new person userID: " + str(userID) + " Level: " + str(baristaDB.GetInteractionLevel(userID))
 				baristaDB.CloseDatabase(DB_NAME)
 				client.definePerson(userID)
 		
