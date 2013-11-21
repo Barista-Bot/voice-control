@@ -140,7 +140,7 @@ def messageResponse(witResult, userId):
 					response = "I'm sorry, I didn't catch your name"
 
 
-			elif(witResult["intent"] == "statement"):
+			elif(witResult["intent"] == "emotion"):
 				if "Negative_Emotion" in witResult["entities"]:
 					response = "That's a shame, would you like a coffee to make you fell better" + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
