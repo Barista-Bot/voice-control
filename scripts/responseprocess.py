@@ -145,7 +145,7 @@ def messageResponse(witResult, userId):
 					response = "That's a shame, would you like a coffee to make you fell better" + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
 					if confirm:
-						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
 						finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -154,11 +154,22 @@ def messageResponse(witResult, userId):
 					response = "That's great, would a coffee make you feel even better?" + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
 					if confirm:
-						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
 						finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
-				
+			
+			elif(witResult["intent"] == "feeling_question"):
+				if "Self" in witResult["entities"]:
+					response = "I'm pretty good thanks - Brewing Coffee makes me happy! Can I get you a coffee?"
+					confirm = confirmation(response)
+					if confirm:
+						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+					else:
+						finished = True
+						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
+			
+
 			elif (witResult["intent"] == "request"):
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
