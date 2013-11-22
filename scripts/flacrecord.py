@@ -26,13 +26,15 @@ def find_input_device(pyaudio):
 def calibrate_input_threshold(audioStream, chunk):
 	print "Calibrating audio stream threshold"
 	currentMaximum = 0
-	for i in range(1,10):
+	for i in range(1, 5):
 		data = audioStream.read(chunk)
         soundLevel = abs(audioop.avg(data, 2))
         if soundLevel > currentMaximum:
         	currentMaximum = soundLevel
 	if currentMaximum < 100:
 		currentMaximum += 70
+	else:
+		currentMaximum += 50
 	print "Setting calibration level to " + str(currentMaximum)
 	return currentMaximum
 
@@ -45,7 +47,7 @@ def listen_for_block_of_speech():
     CHANNELS = 1
     RATE = 16000
     PRE_SAMPLES = 10
-    SILENCE_LIMIT = 1 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
+    SILENCE_LIMIT = 0.5 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
     #open stream
     p = pyaudio.PyAudio()

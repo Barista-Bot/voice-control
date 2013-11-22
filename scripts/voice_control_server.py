@@ -95,6 +95,8 @@ def users_found(self):
 
 	print "Beginning Interaction"
 
+	googleTTS("Hello!")
+
 	begin_interaction()
  
 	return True
