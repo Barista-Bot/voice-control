@@ -23,6 +23,8 @@ def stt_google_wav(filename):
     		res = []
     except IndexError:
     	res = []
+    except SyntaxError:
+        res = []
     return res
 
 if __name__ == '__main__':
