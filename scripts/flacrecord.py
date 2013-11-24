@@ -36,6 +36,10 @@ def calibrate_input_threshold(audioStream, chunk):
 	print "Setting calibration level to " + str(currentMaximum)
 	return currentMaximum
 
+def cancel_interaction():
+	global finished
+	finished = True
+
 
 def listen_for_block_of_speech():
 
@@ -65,6 +69,7 @@ def listen_for_block_of_speech():
     rel = RATE/chunk
     slid_win = deque(maxlen=SILENCE_LIMIT*rel)
     started = False
+    global finished
     finished = False
 
     play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))

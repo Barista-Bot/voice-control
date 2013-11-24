@@ -44,7 +44,7 @@ def confirmation(response):
 
 def messageResponse(witResult, userId):
 	baristaDB.OpenDatabase(DatabaseName)
-	baristaDb.SetTime(userId)
+	baristaDB.SetTime(userId)
 	print "Got UserID " + str(userId) 
 	level = baristaDB.GetInteractionLevel(userId)
 	
@@ -191,27 +191,12 @@ def messageResponse(witResult, userId):
 			
 				response = "I'm sorry, could you repeat that?"
 
-if (witResult["intent"] == "hello"):
-			if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "":
-				response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId)
-				#test code
-				if baristaDB.GetCourse(userId) != "":
-					response += "Last time you mentioned you were studying" + baristaDB.GetCourse(userId)
-					response += "How is that going, is it hard?"
-				if baristaDB.GetTime(userId) != "":
-					#Would be cool to put in something like checking how long it was since they were last seen and then saying I've not seen you since x day!
-					response += "It's been a while since I last saw you, how have you been?"					
-
-					
-			else:
-				response = "Hello there, it's a pleasure to meet you, what's your name?"
-
 #************************************** LEVEL 3  ****************************************
 		else:
 
 			if (witResult["intent"] == "hello"):
 				if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "" and baristaDB.GetCourse(userId) != "":
-					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + "How is " + GetCourse(userId) + "going?" 									else:
+					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + "How is " + GetCourse(userId) + "going?"
 				else:	
 					response = "Hello there, it's a pleasure to meet you, what's your name?"
 
@@ -238,7 +223,7 @@ if (witResult["intent"] == "hello"):
 							else:
 								response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"	
 						else:	
-						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+							response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
 						finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -257,8 +242,8 @@ if (witResult["intent"] == "hello"):
 							else:
 								response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"	
 						else:	
-						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"					else:
-					else						
+							response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+					else:						
 						finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
@@ -290,7 +275,6 @@ if (witResult["intent"] == "hello"):
 				finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
-			
 				response = "I'm sorry, could you repeat that?"
 
 #************************************ ALL LEVELS **************************************
@@ -305,7 +289,10 @@ if (witResult["intent"] == "hello"):
 		response = "Could you repeat that please?"
 	
 	baristaDB.CloseDatabase(DatabaseName)
-	return (response, finished)
+	if 'response' in locals():
+		return (response, finished)
+	else:
+		return ("", finished)
 
 if __name__ == '__main__':
 	fakeWitResult = { 'outcome' : {'intent' : "hello"}}

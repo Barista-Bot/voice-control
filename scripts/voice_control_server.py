@@ -6,7 +6,9 @@ from responseprocess import messageResponse
 from googletext2speech import googleTTS
 from googletext2speech import play_wav
 
-from user_identification import client
+from user_identification import client as UID_client
+import user_identification
+import flacrecord
 
 from voice_control.srv import *
 import rospy, time, os, baristaDB
@@ -21,7 +23,7 @@ def identify_user():
 		print "looking for person"
 		global userID, interactionLevel
 
-		person_result = client.queryPerson()
+		person_result = UID_client.queryPerson()
 		if person_result.is_person:
 			if person_result.is_known_person:
 				userID = person_result.id
@@ -29,22 +31,27 @@ def identify_user():
 				baristaDB.IncrementNumVisits(userID)
 				print "Found existing person userID: " + str(userID) + " Level: " + str(baristaDB.GetInteractionLevel(userID))
 				baristaDB.CloseDatabase(DB_NAME)
-				client.definePerson(userID)
+				UID_client.definePerson(userID)
 			else:
 				baristaDB.OpenDatabase(DB_NAME)
 				userID = baristaDB.CreateNewUser()
 				print "Created new person userID: " + str(userID) + " Level: " + str(baristaDB.GetInteractionLevel(userID))
 				baristaDB.CloseDatabase(DB_NAME)
-				client.definePerson(userID)
+				UID_client.definePerson(userID)
 		
 		waitingForUser = not person_result.is_person
 
 def begin_interaction():
 	global finished
+	googleTTS("Hello there!")
 	finished = False
 	while not finished:
 		flac_file = listen_for_block_of_speech()
+		if finished:
+			break
 		hypothesis = stt_google_wav(flac_file)
+		if finished:
+			break
 		if not hypothesis == []:
 			print hypothesis
 			if hypothesis.lower() == "what does the fox say":
@@ -90,22 +97,28 @@ def begin_interaction():
 			googleTTS(responseString)
 
 def users_found(self):
-
 	identify_user()
-
 	print "Beginning Interaction"
-
 	begin_interaction()
  
 	return True
 
+def userPresenceChange(message):
+	global finished
+	if not finished:
+		finished = not message.is_person
+		if not message.is_person:
+			flacrecord.cancel_interaction()
+			rospy.loginfo(rospy.get_name() + ": User Lost. Terminating")
+
 
 def voice_control_server():
-	interacting = False
-	global userCount
+	global userCount, finished
 	userCount = 1
+	finished = True
 
 	rospy.init_node('voice_control')
+	UID_client.subscribe(userPresenceChange)
 	rospy.Service('voice_control', voice_control, users_found)
 
 	rospy.spin()
