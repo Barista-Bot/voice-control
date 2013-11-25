@@ -91,7 +91,6 @@ def messageResponse(witResult, userId):
 			
 			if (witResult["intent"] == "hello"):
 				response = "Hi, I'm Barista Bot.  What's your name?" 
-			
 			elif (witResult["intent"] == "name"):			
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". would you like a coffee?"
@@ -131,7 +130,6 @@ def messageResponse(witResult, userId):
 
 			if (witResult["intent"] == "hello"):
 				response = "Hi, I'm Barista Bot.  What's your name?" 
-			
 			elif (witResult["intent"] == "name"):			
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". How are you today?"
@@ -196,11 +194,10 @@ def messageResponse(witResult, userId):
 
 			if (witResult["intent"] == "hello"):
 				if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "" and baristaDB.GetCourse(userId) != "":
-					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + "How is " + GetCourse(userId) + "going?"
+					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + "How is " + GetCourse(userId) + "going?"					
 				else:	
 					response = "Hello there, it's a pleasure to meet you, what's your name?"
-
-			elif (witResult["intent"] == "name"):			
+			elif (witResult["intent"] == "name"):
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". What course do you do?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])					

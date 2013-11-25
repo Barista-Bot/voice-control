@@ -2,6 +2,8 @@ import shelve
 import os
 import rospkg
 from datetime import datetime
+import pywapi
+import string
 
 
 def OpenDatabase(file_path):   
@@ -12,7 +14,7 @@ def OpenDatabase(file_path):
 def CreateNewUser():
 	global CoffeeDatabase
 	userId = GetNumberUsers() + 1
-	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": '', "Visit": '1', "Level": ''}
+	CoffeeDatabase[str(userId)] = {"Name": '', "Coffee": '', "Course": '', "Agenda": '', "Weather": '', "Mood": '', "Time": [], "Visit": '1', "Level": ''}
 	SetInteractionLevel(userId)
 	CoffeeDatabase.sync()
 	return userId
@@ -111,9 +113,13 @@ def SetAgenda(userId, Agenda):
 	CoffeeDatabase[str(userId)]["Agenda"] = Agenda
 	CoffeeDatabase.sync()
 
-def SetWeather(userId, Weather):
+def SetWeather(userId):
 	global CoffeeDatabase
-	CoffeeDatabase[str(userId)]["Weather"] = Weather
+
+	weather_com_result = pywapi.get_weather_from_weather_com('UKXX0085')
+	weather_type = string.lower(weather_com_result['current_conditions']['text'])
+	current_temp = weather_com_result['current_conditions']['temperature']
+	CoffeeDatabase[str(userId)]["Weather"] = weather_type
 	CoffeeDatabase.sync()
 
 def SetMood(userId, Mood):
@@ -123,7 +129,7 @@ def SetMood(userId, Mood):
 
 def SetTime(userId):
 	global CoffeeDatabase
-	CoffeeDatabase[str(userId)]["Time"] = str(datetime.now())
+	CoffeeDatabase[str(userId)]["Time"] += [datetime.now()]
 	CoffeeDatabase.sync()
 
 def SetInteractionLevel(userId):
@@ -137,6 +143,9 @@ def IncrementNumVisits(userId):
 	temp = CoffeeDatabase[str(userId)]["Visit"]
 	CoffeeDatabase[str(userId)]["Visit"] = str(int(temp)+1)
 	CoffeeDatabase.sync()
+
+
+
 
 def ClearDatabase():
 	global CoffeeDatabase
@@ -191,14 +200,16 @@ if __name__ == '__main__':
 	SetMood(UId, 'Happy')
 	print GetMood(UId)
 	print "Set and Get Weather"
-	SetWeather(UId, "Cloudy with a Chance of Meatballs")
+	SetWeather(UId)
 	print GetWeather(UId)
 	print "Set and get Agenda"
 	SetAgenda(UId, 'Studying Studying Studying')
 	print GetAgenda(UId)
 	print "Set and get Time"
 	SetTime(UId)
-	print GetTime(UId)
+	#print str(GetTime(UId))
+	SetTime(UId)
+	print GetTime(UId)[0].isoformat()
 
 
 	CloseDatabase(DbTest)
