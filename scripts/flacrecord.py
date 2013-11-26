@@ -23,33 +23,13 @@ def find_input_device(pyaudio):
 
         return device_index
 
-def calibrate_input_threshold(audioStream, chunk):
-	print "Calibrating audio stream threshold"
-	currentMaximum = 0
-	for i in range(1,10):
-		data = audioStream.read(chunk)
-        soundLevel = abs(audioop.avg(data, 2))
-        if soundLevel > currentMaximum:
-        	currentMaximum = soundLevel
-	
-	currentMaximum += 40
-	print "Setting calibration level to " + str(currentMaximum)
-	return currentMaximum
-
-def cancel_interaction():
-	global finished
-	finished = True
-
-
-def listen_for_block_of_speech():
-
-	#config
+def calibrate_input_threshold():
+	CALIBRATION_RANGE = 50
 	chunk = 1024
 	FORMAT = pyaudio.paInt16
 	CHANNELS = 1
 	RATE = 16000
 	PRE_SAMPLES = 10
-	SILENCE_LIMIT = 1 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
 	#open stream
 	p = pyaudio.PyAudio()
@@ -61,7 +41,43 @@ def listen_for_block_of_speech():
                     input_device_index = find_input_device(p),
                     frames_per_buffer = chunk)
 
-	THRESHOLD = calibrate_input_threshold(stream, chunk)
+	print "Calibrating audio stream threshold"
+	currentMaximum = 0
+	for i in range(1,CALIBRATION_RANGE):
+		data = stream.read(chunk)
+        soundLevel = abs(audioop.avg(data, 2))
+        if soundLevel > currentMaximum:
+        	currentMaximum = soundLevel
+	
+	currentMaximum += 40
+	print "Setting calibration level to " + str(currentMaximum)
+	global THRESHOLD
+	THRESHOLD = currentMaximum
+
+def cancel_interaction():
+	global finished
+	finished = True
+
+def listen_for_block_of_speech():
+
+	#config
+	global THRESHOLD
+	chunk = 1024
+	FORMAT = pyaudio.paInt16
+	CHANNELS = 1
+	RATE = 16000
+	PRE_SAMPLES = 10
+	SILENCE_LIMIT = 0.5 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
+
+	#open stream
+	p = pyaudio.PyAudio()
+
+	stream = p.open(format = FORMAT,
+                    channels = CHANNELS,
+                    rate = RATE,
+                    input = True,
+                    input_device_index = find_input_device(p),
+                    frames_per_buffer = chunk)
 
 	all_m = []
 	data = ''
