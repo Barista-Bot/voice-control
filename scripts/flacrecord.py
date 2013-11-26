@@ -93,7 +93,7 @@ def listen_for_block_of_speech():
 	finished = False
 
 	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
-    time.sleep(1)
+	time.sleep(1)
 	while (not finished):
 		try:
 			data = stream.read(chunk)
