@@ -33,6 +33,7 @@ def identify_user():
 			if person_result.is_known_person:
 				userID = person_result.id
 				baristaDB.OpenDatabase(DB_NAME)
+
 				baristaDB.IncrementNumVisits(userID)
 				print "Found existing person userID: " + str(userID) + " Level: " + str(baristaDB.GetInteractionLevel(userID))
 				baristaDB.CloseDatabase(DB_NAME)
@@ -98,10 +99,56 @@ def begin_interaction():
 					responseString, finished = messageResponse(witResult, userID)
 				else:
 					responseString = "I'm sorry, I didnt understand what you said"
+		elif not flac_file == []:
+			hypothesis = stt_google_wav(flac_file)
+			if finished:
+				break
+			if not hypothesis == []:
+				print hypothesis
+				if hypothesis.lower() == "what does the fox say":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
+				elif hypothesis.lower() == "do you have a license":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/mate.wav'))
+				elif hypothesis.lower() == "do you work out":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/work.wav'))
+				elif hypothesis.lower() == "something strange in the neighborhood":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/ghost.wav'))
+				elif hypothesis.lower() == "attention":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/attention.wav'))
+				elif hypothesis.lower() == "i'm talking to you":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/talking.wav'))
+				elif hypothesis.lower() == "i don't want you":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/want.wav'))
+				elif hypothesis.lower() == "how did we meet":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/met.wav'))
+				elif hypothesis.lower() == "do you have any popcorn":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/popcorn.wav'))
+				elif hypothesis.lower() == "how did you get to work today":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/underground.wav'))
+				elif hypothesis.lower() == "which man are you":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/tetris.wav'))
+				elif hypothesis.lower() == "what are you":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/blue.wav'))
+				elif hypothesis.lower() == "the dogs are out":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/dogs.wav'))
+				elif hypothesis.lower() == "what did she say":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/love.wav'))
+				elif hypothesis.lower() == "is there a house in new orleans":
+					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/orleans.wav'))
+				else :
+					witResult = witLookup(hypothesis)
+					if not witResult == []:
+						global userID
+						responseString, finished = messageResponse(witResult, userID)
+					else:
+						responseString = "I'm sorry, I didnt understand what you said"
+					googleTTS(responseString)
+			else:
+				responseString = "I'm sorry, I didn't hear you"
 				googleTTS(responseString)
 		else:
-			responseString = "I'm sorry, I didn't hear you"
-			googleTTS(responseString)
+				responseString = "I'm sorry, I didn't hear you"
+				googleTTS(responseString)
 
 def users_found(self):
 	identify_user()
@@ -127,6 +174,7 @@ def voice_control_server():
 	rospy.init_node('voice_control')
 
 	rospy.Subscriber('~say', String, sayCallback)
+	global pub_speech
 	pub_speech = rospy.Publisher('~speech', String)
 
 	UID_client.subscribe(userPresenceChange)

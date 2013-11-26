@@ -1,6 +1,7 @@
 import os
 import urllib2
 import urllib
+import rospy
 from face.msg import faceRequests
 
 def googleTTS(text='hello', lang='en', fname='result.wav', player='mplayer'):
@@ -8,7 +9,7 @@ def googleTTS(text='hello', lang='en', fname='result.wav', player='mplayer'):
     and returns created speech (wav file). """
     try:
         pub_face_commands = rospy.Publisher('/face/control', faceRequests)
-        face = faceRequest()        
+        face = faceRequests()        
         limit = min(100, len(text))#100 characters is the current limit.
         text = text[0:limit]
         url = "http://translate.google.com/translate_tts"

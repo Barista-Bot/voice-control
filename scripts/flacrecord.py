@@ -12,7 +12,7 @@ def find_input_device(pyaudio):
             devinfo = pyaudio.get_device_info_by_index(i)   
             print( "Device %d: %s"%(i,devinfo["name"]) )
 
-            for keyword in ["primesense","input"]:
+            for keyword in ["primesense","usb"]:
                 if keyword in devinfo["name"].lower():
                     print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
                     device_index = i
@@ -31,8 +31,8 @@ def calibrate_input_threshold(audioStream, chunk):
         soundLevel = abs(audioop.avg(data, 2))
         if soundLevel > currentMaximum:
         	currentMaximum = soundLevel
-	if currentMaximum < 100:
-		currentMaximum += 70
+	
+	currentMaximum += 40
 	print "Setting calibration level to " + str(currentMaximum)
 	return currentMaximum
 
@@ -97,7 +97,6 @@ def listen_for_block_of_speech():
 
 	stream.close()
 	p.terminate()
-
 	if 'flac_filename' in locals():
 		return flac_filename
 	else:
