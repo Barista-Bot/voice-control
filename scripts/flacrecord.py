@@ -24,11 +24,12 @@ def find_input_device(pyaudio):
         return device_index
 
 def calibrate_input_threshold():
+
 	CALIBRATION_RANGE = 50
-	chunk = 1024
+	chunk = 4096
 	FORMAT = pyaudio.paInt16
 	CHANNELS = 1
-	RATE = 16000
+	RATE = 44100
 	PRE_SAMPLES = 10
 
 	#open stream
@@ -49,7 +50,7 @@ def calibrate_input_threshold():
         if soundLevel > currentMaximum:
         	currentMaximum = soundLevel
 	
-	currentMaximum += 40
+	currentMaximum += 5
 	print "Setting calibration level to " + str(currentMaximum)
 	global THRESHOLD
 	THRESHOLD = currentMaximum
@@ -62,10 +63,11 @@ def listen_for_block_of_speech():
 
 	#config
 	global THRESHOLD
-	chunk = 1024
+	#THRESHOLD = 50
+	chunk = 4096
 	FORMAT = pyaudio.paInt16
 	CHANNELS = 1
-	RATE = 16000
+	RATE = 44100
 	PRE_SAMPLES = 10
 	SILENCE_LIMIT = 0.5 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
@@ -91,7 +93,13 @@ def listen_for_block_of_speech():
 	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
     
 	while (not finished):
-		data = stream.read(chunk)
+		try:
+			data = stream.read(chunk)
+		except IOError, e:
+			if e.args[1] == pyaudio.paInputOverflowed:
+				data = '\x00'*chunk
+			else:
+				raise
 		slid_win.append (abs(audioop.avg(data, 2)))
 		if(True in [ x>THRESHOLD for x in slid_win]):
 			if(not started):
@@ -125,13 +133,13 @@ def save_speech(data, p):
     wf = wave.open(filename+'.wav', 'wb')
     wf.setnchannels(1)
     wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
-    wf.setframerate(16000)
+    wf.setframerate(44100)
     wf.writeframes(data)
     wf.close()
     return filename
 
 def convert_wav_to_flac(filename):
-	os.system(FLAC_CONV+ filename+'.wav')
+	os.system(FLAC_CONV + filename+'.wav')
 	os.remove(filename+'.wav')
 	flac_filename = filename+'.flac'
 	return flac_filename
