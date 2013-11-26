@@ -10,11 +10,16 @@ from user_identification import client as UID_client
 import user_identification
 import flacrecord
 
+from std_msgs.msg import String
+
 from voice_control.srv import *
 import rospy, time, os, baristaDB
 
 DB_NAME = "baristaDB.db"
 CONFIDENCE_THRESHOLD = 40
+
+def sayCallback(data):
+	googleTTS(data.data)
 
 def identify_user():
 	waitingForUser = True
@@ -54,6 +59,8 @@ def begin_interaction():
 			break
 		if not hypothesis == []:
 			print hypothesis
+			pub_speech.publish(hypothesis.lower())
+
 			if hypothesis.lower() == "what does the fox say":
 				play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
 			elif hypothesis.lower() == "do you have a license":
@@ -118,7 +125,12 @@ def voice_control_server():
 	finished = True
 
 	rospy.init_node('voice_control')
+
+	rospy.Subscriber('~say', String, sayCallback)
+	pub_speech = rospy.Publisher('~speech', String)
+
 	UID_client.subscribe(userPresenceChange)
+
 	rospy.Service('voice_control', voice_control, users_found)
 
 	rospy.spin()
