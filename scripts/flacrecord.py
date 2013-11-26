@@ -5,6 +5,8 @@ from collections import deque
 from googletext2speech import play_wav
 import os
 import time
+from globalvariables import *
+
 
 def find_input_device(pyaudio):
         device_index = None            
@@ -29,7 +31,7 @@ def calibrate_input_threshold():
 	chunk = 4096
 	FORMAT = pyaudio.paInt16
 	CHANNELS = 1
-	RATE = 44100
+	RATE = SAMPLERATE
 	PRE_SAMPLES = 10
 
 	#open stream
@@ -67,7 +69,7 @@ def listen_for_block_of_speech():
 	chunk = 4096
 	FORMAT = pyaudio.paInt16
 	CHANNELS = 1
-	RATE = 44100
+	RATE = SAMPLERATE
 	PRE_SAMPLES = 10
 	SILENCE_LIMIT = 0.5 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
@@ -91,7 +93,7 @@ def listen_for_block_of_speech():
 	finished = False
 
 	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
-    
+    time.sleep(1)
 	while (not finished):
 		try:
 			data = stream.read(chunk)
