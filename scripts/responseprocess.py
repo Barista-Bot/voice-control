@@ -7,8 +7,13 @@ from googletext2speech import play_wav
 import sys
 import baristaDB
 import rospy
+from user_identification import client as UID_client
 from coffee_machine_control.srv import *
 DatabaseName = "baristaDB.db"
+
+#todo Talk to Face in googleTTS when we say stuff and stop when we are done. Check what we are publishing and subscribing too
+#TODO randomly define people throughout the response process. 
+#TODO Don't exit until user identification tells us to. 
 
 ## Out of coffee and update order
 ## Successful please take a cup put it under nozzle push the button and please be careful the coffee is hot. 
@@ -56,14 +61,16 @@ def messageResponse(witResult, userId):
 		if (level == 0):
 
 			if (witResult["intent"] == "hello"):
+				UID_client.definePerson(userID)
 				response = "Hello would you like a coffee?"
 				confirm = confirmation(response)
 				if confirm:
 					response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 				else:
-					finished = True
+					#finished = True
 					response = "Unfortunately I can only offer you coffee, I hope you have a nice day - Good Bye"
 			elif(witResult["intent"] == "request"):
+				UID_client.definePerson(userID)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " are you sure?"
@@ -78,11 +85,11 @@ def messageResponse(witResult, userId):
 				else:
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha.  Would you like a coffee?"
 			elif (witResult["intent"] == "finished"):
-				finished = True
+				#finished = True
 				response = "That's great.  Goodbye"
 			else:
 				response = "I'm sorry, could you repeat that?"
-
+				UID_client.definePerson(userID)
 
 #************************************** LEVEL 1  ****************************************
 
@@ -91,7 +98,8 @@ def messageResponse(witResult, userId):
 			
 			if (witResult["intent"] == "hello"):
 				response = "Hi, I'm Barista Bot.  What's your name?" 
-			elif (witResult["intent"] == "name"):			
+			elif (witResult["intent"] == "name"):	
+				UID_client.definePerson(userID)		
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". would you like a coffee?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])
@@ -99,11 +107,12 @@ def messageResponse(witResult, userId):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 					else:
-						finished = True
+				#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 				else:
 					response = "I'm sorry, I didn't catch your name"
 			elif (witResult["intent"] == "request"):
+				UID_client.definePerson(userID)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
@@ -118,10 +127,11 @@ def messageResponse(witResult, userId):
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
 				
 			elif (witResult["intent"] == "finished"):
-				finished = True
+				#finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 				response = "I'm sorry, could you repeat that?"
+				UID_client.definePerson(userID)
 
 #************************************** LEVEL 2  ****************************************
 
@@ -130,7 +140,8 @@ def messageResponse(witResult, userId):
 
 			if (witResult["intent"] == "hello"):
 				response = "Hi, I'm Barista Bot.  What's your name?" 
-			elif (witResult["intent"] == "name"):			
+			elif (witResult["intent"] == "name"):		
+				UID_client.definePerson(userID)	
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". How are you today?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])					
@@ -139,22 +150,24 @@ def messageResponse(witResult, userId):
 
 
 			elif(witResult["intent"] == "emotion"):
+				UID_client.definePerson(userID)
 				if "Negative_Emotion" in witResult["entities"]:
 					response = "That's a shame, would you like a coffee to make you fell better " + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						finished = True
+						#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 
 				elif "Positive_Emotion" in witResult["entities"]:
+					UID_client.definePerson(userID)
 					response = "That's great, would a coffee make you feel even better?" + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						finished = True
+						#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
 			elif(witResult["intent"] == "feeling_question"):
@@ -164,11 +177,12 @@ def messageResponse(witResult, userId):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						finished = True
+						#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
 
 			elif (witResult["intent"] == "request"):
+				UID_client.definePerson(userID)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
@@ -183,29 +197,33 @@ def messageResponse(witResult, userId):
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
 				
 			elif (witResult["intent"] == "finished"):
-				finished = True
+				#finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 			
 				response = "I'm sorry, could you repeat that?"
+				UID_client.definePerson(userID)
 
 #************************************** LEVEL 3  ****************************************
 		else:
 
 			if (witResult["intent"] == "hello"):
+				UID_client.definePerson(userID)
 				if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "" and baristaDB.GetCourse(userId) != "":
 					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + "How is " + GetCourse(userId) + "going?"					
 				else:	
 					response = "Hello there, it's a pleasure to meet you, what's your name?"
 			elif (witResult["intent"] == "name"):
+				UID_client.definePerson(userID)
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". What course do you do?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])					
 				else:
 					response = "I'm sorry, I didn't catch your name"
 			
-			#THIS EMOTION IS FOR COURSE Feeling. CBA TO ADD A WHOLE THING FOR COURSE THOUGHTS IT'LL JUST BE TOO CLOSE to other shit
+			#THIS EMOTION IS FOR COURSE Feeling.
 			elif(witResult["intent"] == "emotion"):
+				UID_client.definePerson(userID)
 				if "Negative_Emotion" in witResult["entities"]:
 					response = "That's frustrating, would you like a coffee to improve your day? " + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
@@ -222,10 +240,11 @@ def messageResponse(witResult, userId):
 						else:	
 							response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						finished = True
+						#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 
 				elif "Positive_Emotion" in witResult["entities"]:
+					UID_client.definePerson(userID)
 					response = "That's great, would you like a coffee to improve your productivity?" + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
 					if confirm:
@@ -241,20 +260,22 @@ def messageResponse(witResult, userId):
 						else:	
 							response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:						
-						finished = True
+						#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
 			elif(witResult["intent"] == "feeling_question"):
+				UID_client.definePerson(userID)
 				if "Self" in witResult["entities"]:
 					response = "I'm pretty good thanks - Brewing Coffee makes me happy! Can I get you a coffee?"
 					confirm = confirmation(response)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						finished = True
+						#finished = True
 						response = "Unfortunately I only offer coffee, I hope you have a nice day " + baristaDB.GetUserName(userId) + ". Good Bye"			
 
 			elif (witResult["intent"] == "request"):
+				UID_client.definePerson(userID)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
@@ -269,7 +290,7 @@ def messageResponse(witResult, userId):
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
 				
 			elif (witResult["intent"] == "finished"):
-				finished = True
+				#finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 				response = "I'm sorry, could you repeat that?"
@@ -277,7 +298,7 @@ def messageResponse(witResult, userId):
 #************************************ ALL LEVELS **************************************
 
 		if (witResult["intent"] == "good_bye"):
-				finished = True
+				#finished = True
 				response = "Bye!"
 		
 	except TypeError:
