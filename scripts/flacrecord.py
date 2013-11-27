@@ -12,7 +12,7 @@ def find_input_device(pyaudio):
         device_index = None            
         for i in range( pyaudio.get_device_count() ):     
             devinfo = pyaudio.get_device_info_by_index(i)   
-            print( "Device %d: %s"%(i,devinfo["name"]) )
+            #print( "Device %d: %s"%(i,devinfo["name"]) )
 
             for keyword in ["primesense","usb"]:
                 if keyword in devinfo["name"].lower():
@@ -27,7 +27,7 @@ def find_input_device(pyaudio):
 
 def calibrate_input_threshold():
 
-	CALIBRATION_RANGE = 50
+	CALIBRATION_RANGE = 10
 	chunk = 4096
 	FORMAT = pyaudio.paInt16
 	CHANNELS = 1
@@ -37,6 +37,9 @@ def calibrate_input_threshold():
 	#open stream
 	p = pyaudio.PyAudio()
 
+	print "Calibrating audio stream threshold"
+	noise = 0
+	noiseTotal = 0
 	stream = p.open(format = FORMAT,
                     channels = CHANNELS,
                     rate = RATE,
@@ -44,24 +47,34 @@ def calibrate_input_threshold():
                     input_device_index = find_input_device(p),
                     frames_per_buffer = chunk)
 
-	print "Calibrating audio stream threshold"
-	currentMaximum = 0
-	for i in range(1,CALIBRATION_RANGE):
+	for i in range(CALIBRATION_RANGE):
 		data = stream.read(chunk)
-        soundLevel = abs(audioop.avg(data, 2))
-        if soundLevel > currentMaximum:
-        	currentMaximum = soundLevel
+		noiseTotal += abs(audioop.avg(data, 2))
+
+	stream.close()
+	p.terminate()
 	
-	currentMaximum += 5
-	print "Setting calibration level to " + str(currentMaximum)
+	noise = (noiseTotal / CALIBRATION_RANGE)
+	noise *= 1.5
+	print "Setting calibration level to " + str(noise)
 	global THRESHOLD
-	THRESHOLD = currentMaximum
+	THRESHOLD = noise
+	
 
 def cancel_interaction():
 	global finished
 	finished = True
 
+def averageLevel(sliding_window):
+	noise = 0
+	for sample in sliding_window:
+		noise += sample
+
+	return (noise / len(sliding_window))
+
 def listen_for_block_of_speech():
+
+	calibrate_input_threshold()
 
 	#config
 	global THRESHOLD
@@ -76,6 +89,19 @@ def listen_for_block_of_speech():
 	#open stream
 	p = pyaudio.PyAudio()
 
+	all_m = []
+	data = ''
+	SILENCE_LIMIT = 2
+	rel = RATE/chunk
+	slid_win = deque(maxlen=(SILENCE_LIMIT*rel))
+	started = False
+	global finished
+	finished = False
+
+	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
+	
+	time.sleep(0.2)
+
 	stream = p.open(format = FORMAT,
                     channels = CHANNELS,
                     rate = RATE,
@@ -83,17 +109,6 @@ def listen_for_block_of_speech():
                     input_device_index = find_input_device(p),
                     frames_per_buffer = chunk)
 
-	all_m = []
-	data = ''
-	SILENCE_LIMIT = 2
-	rel = RATE/chunk
-	slid_win = deque(maxlen=SILENCE_LIMIT*rel)
-	started = False
-	global finished
-	finished = False
-
-	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
-	time.sleep(1)
 	while (not finished):
 		try:
 			data = stream.read(chunk)
@@ -103,7 +118,9 @@ def listen_for_block_of_speech():
 			else:
 				raise
 		slid_win.append (abs(audioop.avg(data, 2)))
-		if(True in [ x>THRESHOLD for x in slid_win]):
+		average = averageLevel(slid_win)
+		print "Average in window: " + str(average) + " threshold = " + str(THRESHOLD)
+		if(average > THRESHOLD):
 			if(not started):
 				print("starting to record")
 			started = True

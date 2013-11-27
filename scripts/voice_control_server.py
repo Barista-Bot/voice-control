@@ -24,7 +24,7 @@ def sayCallback(data):
 def identify_user():
 	waitingForUser = True
 
-	flacrecord.calibrate_input_threshold()
+	#flacrecord.calibrate_input_threshold()
 
 	while waitingForUser:
 		print "looking for person"
