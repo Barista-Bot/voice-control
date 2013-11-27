@@ -14,7 +14,7 @@ def find_input_device(pyaudio):
             devinfo = pyaudio.get_device_info_by_index(i)   
             #print( "Device %d: %s"%(i,devinfo["name"]) )
 
-            for keyword in ["primesense","usb"]:
+            for keyword in ["internal","usb"]:
                 if keyword in devinfo["name"].lower():
                     print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
                     device_index = i
@@ -35,12 +35,24 @@ def calibrate_input_threshold():
 	print "Calibrating audio stream threshold"
 	noise = 0
 	noiseTotal = 0
-	stream = p.open(format = FORMAT,
+	try:
+		stream = p.open(format = FORMAT,
                     channels = CHANNELS,
                     rate = SAMPLERATE,
                     input = True,
                     input_device_index = find_input_device(p),
                     frames_per_buffer = CHUNK)
+	except IOError, e:
+		if e.args[1] == pyaudio.paInvalidSampleRate:
+			globalvariables.SAMPLERATE = 48000
+			stream = p.open(format = FORMAT,
+                    channels = CHANNELS,
+                    rate = SAMPLERATE,
+                    input = True,
+                    input_device_index = find_input_device(p),
+                    frames_per_buffer = CHUNK)
+		else:
+			raise
 
 	for i in range(CALIBRATION_RANGE):
 		data = stream.read(CHUNK)
@@ -91,12 +103,24 @@ def listen_for_block_of_speech():
 	
 	time.sleep(0.2)
 
-	stream = p.open(format = FORMAT,
+	try:
+		stream = p.open(format = FORMAT,
                     channels = CHANNELS,
                     rate = SAMPLERATE,
                     input = True,
                     input_device_index = find_input_device(p),
                     frames_per_buffer = CHUNK)
+	except IOError, e:
+		if e.args[1] == pyaudio.paInvalidSampleRate:
+			globalvariables.SAMPLERATE = 48000
+			stream = p.open(format = FORMAT,
+                    channels = CHANNELS,
+                    rate = SAMPLERATE,
+                    input = True,
+                    input_device_index = find_input_device(p),
+                    frames_per_buffer = CHUNK)
+		else:
+			raise
 
 	while (not finished):
 		try:
