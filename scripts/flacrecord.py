@@ -13,7 +13,7 @@ def find_input_device(pyaudio):
         device_index = None            
         for i in range( pyaudio.get_device_count() ):     
             devinfo = pyaudio.get_device_info_by_index(i)   
-            #print( "Device %d: %s"%(i,devinfo["name"]) )
+            print( "Device %d: %s"%(i,devinfo["name"]) )
 
             for keyword in ["internal","usb"]:
                 if keyword in devinfo["name"].lower():
@@ -40,7 +40,7 @@ def calibrate_input_threshold():
 		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 	except IOError, e:
 		if e.args[1] == pyaudio.paInvalidSampleRate:
-			globalvariables.SAMPLERATE = 16000
+			globalvariables.SAMPLERATE = 44100
 			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 		else:
 			raise
@@ -98,7 +98,7 @@ def listen_for_block_of_speech():
 		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 	except IOError, e:
 		if e.args[1] == pyaudio.paInvalidSampleRate:
-			globalvariables.SAMPLERATE = 48000
+			globalvariables.SAMPLERATE = 44100
 			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 		else:
 			raise
