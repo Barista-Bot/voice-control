@@ -40,7 +40,7 @@ def calibrate_input_threshold():
 		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 	except IOError, e:
 		if e.args[1] == pyaudio.paInvalidSampleRate:
-			globalvariables.SAMPLERATE = 48000
+			globalvariables.SAMPLERATE = 16000
 			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 		else:
 			raise
