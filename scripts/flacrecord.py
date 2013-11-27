@@ -5,6 +5,7 @@ from collections import deque
 from googletext2speech import play_wav
 import os
 import time
+import globalvariables
 from globalvariables import *
 
 
