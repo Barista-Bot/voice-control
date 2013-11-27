@@ -126,6 +126,7 @@ def listen_for_block_of_speech():
 			started = True
 			all_m.append(data)
 		elif (started==True):
+			print "Stopped recording"
 			wav_filename = save_speech(all_m,p)
 			flac_filename = convert_wav_to_flac(wav_filename)
 			#reset all
@@ -136,10 +137,11 @@ def listen_for_block_of_speech():
 				all_m.pop(0)
 			all_m.append(data)
 
-	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
-
 	stream.close()
 	p.terminate()
+
+	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
+
 	if 'flac_filename' in locals():
 		return flac_filename
 	else:
