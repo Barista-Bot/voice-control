@@ -37,21 +37,11 @@ def calibrate_input_threshold():
 	noise = 0
 	noiseTotal = 0
 	try:
-		stream = p.open(format = FORMAT,
-                    channels = CHANNELS,
-                    rate = SAMPLERATE,
-                    input = True,
-                    input_device_index = find_input_device(p),
-                    frames_per_buffer = CHUNK)
+		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 	except IOError, e:
 		if e.args[1] == pyaudio.paInvalidSampleRate:
 			globalvariables.SAMPLERATE = 48000
-			stream = p.open(format = FORMAT,
-                    channels = CHANNELS,
-                    rate = SAMPLERATE,
-                    input = True,
-                    input_device_index = find_input_device(p),
-                    frames_per_buffer = CHUNK)
+			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 		else:
 			raise
 
@@ -105,21 +95,11 @@ def listen_for_block_of_speech():
 	time.sleep(0.2)
 
 	try:
-		stream = p.open(format = FORMAT,
-                    channels = CHANNELS,
-                    rate = SAMPLERATE,
-                    input = True,
-                    input_device_index = find_input_device(p),
-                    frames_per_buffer = CHUNK)
+		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 	except IOError, e:
 		if e.args[1] == pyaudio.paInvalidSampleRate:
 			globalvariables.SAMPLERATE = 48000
-			stream = p.open(format = FORMAT,
-                    channels = CHANNELS,
-                    rate = SAMPLERATE,
-                    input = True,
-                    input_device_index = find_input_device(p),
-                    frames_per_buffer = CHUNK)
+			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 		else:
 			raise
 
