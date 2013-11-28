@@ -11,10 +11,6 @@ from user_identification import client as UID_client
 from coffee_machine_control.srv import *
 DatabaseName = "baristaDB.db"
 
-#todo Talk to Face in googleTTS when we say stuff and stop when we are done. Check what we are publishing and subscribing too
-#TODO randomly define people throughout the response process. 
-#TODO Don't exit until user identification tells us to. 
-
 ## Out of coffee and update order
 ## Successful please take a cup put it under nozzle push the button and please be careful the coffee is hot. 
 def dispense_coffee(coffee):
@@ -23,10 +19,10 @@ def dispense_coffee(coffee):
 	try:
 	    for Type in ["caramel", "mocha", "vanilla", "espresso"]:
 		    if Type in coffee.lower():
+		        googleTTS("We're making your coffee now. Please wait")
 	            resp = coffee_machine_control(coffee)
 	            print resp
-	            googleTTS("Take a cup, place it under the nozzle and push the button - be careful the coffee will be hot!")
-	            return "Let me know when you're done"
+	            return "Your coffee's ready, please take the cup"
         return "That hasn't worked, sorry"
 	except rospy.ServiceException, e:
 	    print "Service call failed: %s"%e
