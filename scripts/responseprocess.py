@@ -14,19 +14,20 @@ DatabaseName = "baristaDB.db"
 ## Out of coffee and update order
 ## Successful please take a cup put it under nozzle push the button and please be careful the coffee is hot. 
 def dispense_coffee(coffee):
+	print "Waiting for coffee machine"
 	rospy.wait_for_service('coffee_machine')
 	coffee_machine_control = rospy.ServiceProxy('coffee_machine', coffee_machine)
 	try:
-	    for Type in ["caramel", "mocha", "vanilla", "espresso"]:
-		    if Type in coffee.lower():
-		        googleTTS("We're making your coffee now. Please wait")
-	            resp = coffee_machine_control(coffee)
-	            print resp
-	            return "Your coffee's ready, please take the cup"
-        return "That hasn't worked, sorry"
+		for Type in ["caramel", "mocha", "vanilla", "espresso"]:
+			if Type in coffee.lower():
+				googleTTS("We're making your coffee now. Please wait")
+				resp = coffee_machine_control(coffee)
+				print resp
+				return "Your coffee's ready, please take the cup"
+		return "That hasn't worked, sorry"
 	except rospy.ServiceException, e:
-	    print "Service call failed: %s"%e
-	    return "I'm sorry, something's gone wrong.  Please tell the Barista Bot team"
+		print "Service call failed: %s"%e
+		return "I'm sorry, something's gone wrong.  Please tell the Barista Bot team"
 
 def validCoffeeChoice(coffeeType):
 	for Type in ["caramel", "mocha", "vanilla", "espresso"]:
@@ -35,14 +36,18 @@ def validCoffeeChoice(coffeeType):
 	return False	
 
 def confirmation(response):
-	googleTTS(response)
-	flac_file = listen_for_block_of_speech()
-	hypothesis = stt_google_wav(flac_file)
-	if not hypothesis == []:
-		witResult = witLookup(hypothesis)
-		if not witResult == []:
-			if (witResult["intent"] == "affirmative"):
-				return True
+	witResult = {"intent" : None}
+	while not (witResult["intent"] in ["affirmative", "negative"]):
+		googleTTS(response)
+		flac_file = listen_for_block_of_speech()
+		hypothesis = stt_google_wav(flac_file)
+		if not hypothesis == []:
+			witResult = witLookup(hypothesis)
+			if not witResult == []:
+				if (witResult["intent"] == "affirmative"):
+					return True
+				elif (witResult["intent"] == "negative"):
+					return False
 	return False	
 
 

@@ -15,7 +15,7 @@ def find_input_device(pyaudio):
             devinfo = pyaudio.get_device_info_by_index(i)   
             print( "Device %d: %s"%(i,devinfo["name"]) )
 
-            for keyword in ["internal","usb"]:
+            for keyword in []:
                 if keyword in devinfo["name"].lower():
                     print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
                     device_index = i
@@ -27,9 +27,6 @@ def find_input_device(pyaudio):
         return device_index
 
 def calibrate_input_threshold():
-
-	CALIBRATION_RANGE = 10
-
 	#open stream
 	p = pyaudio.PyAudio()
 
@@ -113,6 +110,7 @@ def listen_for_block_of_speech():
 				raise
 		slid_win.append (abs(audioop.avg(data, 2)))
 		average = averageLevel(slid_win)
+		print "Average of window: " + str(average) + " threshold: " + str(THRESHOLD)
 		if(average > THRESHOLD):
 			if(not started):
 				print("starting to record")

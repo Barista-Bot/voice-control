@@ -137,7 +137,7 @@ def voice_control_server():
 	global pub_speech
 	pub_speech = rospy.Publisher('~speech', String)
 
-	UID_client.subscribe(userPresenceChange)
+	#UID_client.subscribe(userPresenceChange)
 
 	rospy.Service('voice_control', voice_control, users_found)
 
