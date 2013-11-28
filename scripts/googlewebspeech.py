@@ -17,7 +17,7 @@ def stt_google_wav(filename):
     p = urllib2.urlopen(req)
     try:
     	hypotheses = eval(p.read())['hypotheses']
-    	print hypotheses
+    	#print hypotheses
     	if(float(hypotheses[0]['confidence']) > CONFIDENCE_VALUE):
     		res = hypotheses[0]['utterance']
     	else:

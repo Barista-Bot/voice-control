@@ -5,6 +5,7 @@ from collections import deque
 from googletext2speech import play_wav
 import os
 import time
+import globalvariables
 from globalvariables import *
 
 
@@ -14,7 +15,7 @@ def find_input_device(pyaudio):
             devinfo = pyaudio.get_device_info_by_index(i)   
             print( "Device %d: %s"%(i,devinfo["name"]) )
 
-            for keyword in ["primesense","usb"]:
+            for keyword in ["internal","usb"]:
                 if keyword in devinfo["name"].lower():
                     print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
                     device_index = i
@@ -27,88 +28,98 @@ def find_input_device(pyaudio):
 
 def calibrate_input_threshold():
 
-	CALIBRATION_RANGE = 50
-	chunk = 4096
-	FORMAT = pyaudio.paInt16
-	CHANNELS = 1
-	RATE = SAMPLERATE
-	PRE_SAMPLES = 10
+	CALIBRATION_RANGE = 10
 
 	#open stream
 	p = pyaudio.PyAudio()
 
-	stream = p.open(format = FORMAT,
-                    channels = CHANNELS,
-                    rate = RATE,
-                    input = True,
-                    input_device_index = find_input_device(p),
-                    frames_per_buffer = chunk)
-
 	print "Calibrating audio stream threshold"
-	currentMaximum = 0
-	for i in range(1,CALIBRATION_RANGE):
-		data = stream.read(chunk)
-        soundLevel = abs(audioop.avg(data, 2))
-        if soundLevel > currentMaximum:
-        	currentMaximum = soundLevel
+	noise = 0
+	noiseTotal = 0
+	try:
+		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
+	except IOError, e:
+		if e.args[1] == pyaudio.paInvalidSampleRate:
+			globalvariables.SAMPLERATE = 44100
+			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
+		else:
+			raise
+
+	for i in range(CALIBRATION_RANGE):
+		data = stream.read(CHUNK)
+		noiseTotal += abs(audioop.avg(data, 2))
+
+	stream.close()
+	p.terminate()
 	
-	currentMaximum += 5
-	print "Setting calibration level to " + str(currentMaximum)
+	noise = (noiseTotal / CALIBRATION_RANGE)
+	noise *= THRESHOLD_AMPLIFICATION
+	print "Setting calibration level to " + str(noise)
 	global THRESHOLD
-	THRESHOLD = currentMaximum
+	THRESHOLD = noise
+	
 
 def cancel_interaction():
 	global finished
 	finished = True
 
+def averageLevel(sliding_window):
+	noise = 0
+	for sample in sliding_window:
+		noise += sample
+
+	return (noise / len(sliding_window))
+
 def listen_for_block_of_speech():
+
+	calibrate_input_threshold()
 
 	#config
 	global THRESHOLD
 	#THRESHOLD = 50
-	chunk = 4096
-	FORMAT = pyaudio.paInt16
-	CHANNELS = 1
-	RATE = SAMPLERATE
-	PRE_SAMPLES = 10
-	SILENCE_LIMIT = 0.5 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
 
 	#open stream
 	p = pyaudio.PyAudio()
 
-	stream = p.open(format = FORMAT,
-                    channels = CHANNELS,
-                    rate = RATE,
-                    input = True,
-                    input_device_index = find_input_device(p),
-                    frames_per_buffer = chunk)
-
 	all_m = []
 	data = ''
 	SILENCE_LIMIT = 2
-	rel = RATE/chunk
-	slid_win = deque(maxlen=SILENCE_LIMIT*rel)
+	rel = SAMPLERATE/CHUNK
+	slid_win = deque(maxlen=(SILENCE_LIMIT*rel))
 	started = False
 	global finished
 	finished = False
 
 	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
-	time.sleep(1)
+	
+	time.sleep(0.2)
+
+	try:
+		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
+	except IOError, e:
+		if e.args[1] == pyaudio.paInvalidSampleRate:
+			globalvariables.SAMPLERATE = 44100
+			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
+		else:
+			raise
+
 	while (not finished):
 		try:
-			data = stream.read(chunk)
+			data = stream.read(CHUNK)
 		except IOError, e:
 			if e.args[1] == pyaudio.paInputOverflowed:
-				data = '\x00'*chunk
+				data = '\x00'*CHUNK
 			else:
 				raise
 		slid_win.append (abs(audioop.avg(data, 2)))
-		if(True in [ x>THRESHOLD for x in slid_win]):
+		average = averageLevel(slid_win)
+		if(average > THRESHOLD):
 			if(not started):
 				print("starting to record")
 			started = True
 			all_m.append(data)
 		elif (started==True):
+			print "Stopped recording"
 			wav_filename = save_speech(all_m,p)
 			flac_filename = convert_wav_to_flac(wav_filename)
 			#reset all
@@ -119,10 +130,11 @@ def listen_for_block_of_speech():
 				all_m.pop(0)
 			all_m.append(data)
 
-	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
-
 	stream.close()
 	p.terminate()
+
+	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
+
 	if 'flac_filename' in locals():
 		return flac_filename
 	else:
@@ -134,7 +146,7 @@ def save_speech(data, p):
     data = ''.join(data)
     wf = wave.open(filename+'.wav', 'wb')
     wf.setnchannels(1)
-    wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+    wf.setsampwidth(p.get_sample_size(FORMAT))
     wf.setframerate(44100)
     wf.writeframes(data)
     wf.close()

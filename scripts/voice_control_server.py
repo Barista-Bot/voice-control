@@ -24,7 +24,7 @@ def sayCallback(data):
 def identify_user():
 	waitingForUser = True
 
-	flacrecord.calibrate_input_threshold()
+	#flacrecord.calibrate_input_threshold()
 
 	while waitingForUser:
 		print "looking for person"
@@ -59,13 +59,12 @@ def begin_interaction():
 			break
 		if finished:
 			break
-		print flac_file
 		if not flac_file == []:
 			hypothesis = stt_google_wav(flac_file)
 			if finished:
 				break
 			if not hypothesis == []:
-				print hypothesis
+				print "I heard: " + hypothesis
 				if hypothesis.lower() == "what does the fox say":
 					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
 				elif hypothesis.lower() == "do you have a license":
