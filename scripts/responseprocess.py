@@ -35,7 +35,11 @@ def validCoffeeChoice(coffeeType):
 	for Type in ["caramel", "mocha", "vanilla", "espresso"]:
 		if Type in coffeeType.lower():
 			return True
-	return False	
+	return False
+
+def randomNegative():
+	responses = ["I'm sorry, I didn't hear you", "Sorry, I didn't catch that", "Sorry I didn't get that", "I didn't hear you", "I didn't get that", "I couldn't make that out"]
+	return responses[randint(0, len(responses))]
 
 def confirmation(response):
 	witResult = {"intent" : None}

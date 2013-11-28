@@ -104,13 +104,13 @@ def begin_interaction():
 						global userID
 						responseString, finished = messageResponse(witResult, userID)
 					else:
-						responseString = "I'm sorry, I didnt understand what you said"
+						responseString = responseprocess.randomNegative()
 					googleTTS(responseString)
 			else:
-				responseString = "I'm sorry, I didn't hear you"
+				responseString = responseprocess.randomNegative()
 				googleTTS(responseString)
 		else:
-				responseString = "I'm sorry, I didn't hear you"
+				responseString = responseprocess.randomNegative()
 				googleTTS(responseString)
 
 def users_found(self):
