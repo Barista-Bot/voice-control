@@ -50,11 +50,13 @@ def identify_user():
 		waitingForUser = not person_result.is_person
 
 def begin_interaction():
-	global finished
+	global finished, Paused
 	googleTTS("Hello there!  Speak clearly, towards the microphone")
 	googleTTS("speak after the tone")
 	finished = False
 	while not finished:
+		while (Paused):
+			pass
 		flac_file = listen_for_block_of_speech()
 		if finished:
 			break
@@ -126,6 +128,13 @@ def userPresenceChange(message):
 			flacrecord.cancel_interaction()
 			rospy.loginfo(rospy.get_name() + ": User Lost. Terminating")
 
+def pause_callback(message):
+	global Paused
+	if (message.data == 'pause')
+		Paused = True
+	else
+		Paused = False
+
 
 def voice_control_server():
 	global userCount, finished
@@ -141,6 +150,8 @@ def voice_control_server():
 	#UID_client.subscribe(userPresenceChange)
 
 	rospy.Service('voice_control', voice_control, users_found)
+
+	rospy.Subscriber('~commands', String, pause_callback)
 
 	rospy.spin()
 

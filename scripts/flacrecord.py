@@ -100,9 +100,12 @@ def listen_for_block_of_speech():
 		else:
 			raise
 
+	startTime = time.time()
+
 	while (not finished):
 		try:
 			data = stream.read(CHUNK)
+			currTime = time.time()
 		except IOError, e:
 			if e.args[1] == pyaudio.paInputOverflowed:
 				data = '\x00'*CHUNK
@@ -111,22 +114,31 @@ def listen_for_block_of_speech():
 		slid_win.append (abs(audioop.avg(data, 2)))
 		average = averageLevel(slid_win)
 		print "Average of window: " + str(average) + " threshold: " + str(THRESHOLD)
+
 		if(average > THRESHOLD):
 			if(not started):
 				print("starting to record")
-			started = True
-			all_m.append(data)
+				started = True
+				all_m.append(data)
+				startTime = time.time()
+			elif (started and (currTime - startTime > 15)):
+				print "Stopped recording due to timeout"
+				wav_filename = save_speech(all_m,p)
+				flac_filename = convert_wav_to_flac(wav_filename)
+				started = False
+				finished = True
 		elif (started==True):
 			print "Stopped recording"
 			wav_filename = save_speech(all_m,p)
 			flac_filename = convert_wav_to_flac(wav_filename)
-			#reset all
 			started = False
 			finished = True
 		else:
 			if len(all_m) > PRE_SAMPLES:
 				all_m.pop(0)
 			all_m.append(data)
+			if (currTime - startTime > 20):
+				finished = True
 
 	stream.close()
 	p.terminate()
