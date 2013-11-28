@@ -130,9 +130,9 @@ def userPresenceChange(message):
 
 def pause_callback(message):
 	global Paused
-	if (message.data == 'pause')
+	if (message.data == 'pause'):
 		Paused = True
-	else
+	else:
 		Paused = False
 
 
