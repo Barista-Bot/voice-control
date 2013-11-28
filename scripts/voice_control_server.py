@@ -51,7 +51,8 @@ def identify_user():
 
 def begin_interaction():
 	global finished
-	googleTTS("Hello there!")
+	googleTTS("Hello there!  Speak clearly, towards the microphone")
+	googleTTS("speak after the tone")
 	finished = False
 	while not finished:
 		flac_file = listen_for_block_of_speech()

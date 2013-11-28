@@ -14,14 +14,15 @@ DatabaseName = "baristaDB.db"
 ## Out of coffee and update order
 ## Successful please take a cup put it under nozzle push the button and please be careful the coffee is hot. 
 def dispense_coffee(coffee):
-	print "Waiting for coffee machine"
+	print "Waiting for Coffee Machine..."
 	rospy.wait_for_service('coffee_machine')
 	coffee_machine_control = rospy.ServiceProxy('coffee_machine', coffee_machine)
 	try:
 		for Type in ["caramel", "mocha", "vanilla", "espresso"]:
 			if Type in coffee.lower():
 				googleTTS("We're making your coffee now. Please wait")
-				resp = coffee_machine_control(coffee)
+				print "Requesting a " + Type
+				resp = coffee_machine_control(Type)
 				print resp
 				return "Your coffee's ready, please take the cup"
 		return "That hasn't worked, sorry"
