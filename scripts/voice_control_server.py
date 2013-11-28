@@ -50,9 +50,10 @@ def identify_user():
 		waitingForUser = not person_result.is_person
 
 def begin_interaction():
-	global finished, Paused
+	global finished, Paused, pub_speech
 	googleTTS("Hello there!  Speak clearly, towards the microphone")
 	googleTTS("speak after the tone")
+	Paused = False
 	finished = False
 	while not finished:
 		while (Paused):
@@ -68,6 +69,7 @@ def begin_interaction():
 				break
 			if not hypothesis == []:
 				print "I heard: " + hypothesis
+				pub_speech(hypothesis)
 				if hypothesis.lower() == "what does the fox say":
 					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
 				elif hypothesis.lower() == "do you have a license":

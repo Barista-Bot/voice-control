@@ -22,7 +22,7 @@ def find_input_device(pyaudio):
                     return device_index
 
         if device_index == None:
-            print( "No preferred input found; using default input device." )
+            print( "-----------No preferred input found; using default input device.-----------" )
 
         return device_index
 
@@ -30,7 +30,7 @@ def calibrate_input_threshold():
 	#open stream
 	p = pyaudio.PyAudio()
 
-	print "Calibrating audio stream threshold"
+	print "-----------Calibrating audio stream threshold-----------"
 	noise = 0
 	noiseTotal = 0
 	try:
@@ -51,7 +51,7 @@ def calibrate_input_threshold():
 	
 	noise = (noiseTotal / CALIBRATION_RANGE)
 	noise *= THRESHOLD_AMPLIFICATION
-	print "Setting calibration level to " + str(noise)
+	print "-----------Setting calibration level to " + str(noise) + "-----------"
 	global THRESHOLD
 	THRESHOLD = noise
 	
@@ -122,13 +122,13 @@ def listen_for_block_of_speech():
 				all_m.append(data)
 				startTime = time.time()
 			elif (started and (currTime - startTime > 15)):
-				print "Stopped recording due to timeout"
+				print "-----------Stopped recording due to timeout-----------"
 				wav_filename = save_speech(all_m,p)
 				flac_filename = convert_wav_to_flac(wav_filename)
 				started = False
 				finished = True
 		elif (started==True):
-			print "Stopped recording"
+			print "-----------Stopped recording-----------"
 			wav_filename = save_speech(all_m,p)
 			flac_filename = convert_wav_to_flac(wav_filename)
 			started = False

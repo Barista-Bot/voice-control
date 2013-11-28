@@ -84,7 +84,7 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-						response = "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " are you sure?"
+						response = "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " is that correct??"
 						confirm = confirmation(response)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
@@ -126,7 +126,7 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
+						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; is that correct??"
 						confirm = confirmation(response)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
@@ -196,7 +196,7 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
+						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; is that correct??"
 						confirm = confirmation(response)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
@@ -289,7 +289,7 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; are you sure?"
+						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; is that correct??"
 						confirm = confirmation(response)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
