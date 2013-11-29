@@ -26,8 +26,6 @@ def sayCallback(data):
 def identify_user():
 	waitingForUser = True
 
-	#flacrecord.calibrate_input_threshold()
-
 	while waitingForUser:
 		print "looking for person"
 		global userID, interactionLevel
@@ -53,10 +51,12 @@ def identify_user():
 
 def begin_interaction():
 	global finished, Paused, pub_speech
+	flacrecord.calibrate_input_threshold()
 	googleTTS("Hello there!  Speak clearly, towards the microphone")
 	googleTTS("speak after the tone")
 	Paused = False
 	finished = False
+
 	while not finished:
 		while (Paused):
 			pass
@@ -109,12 +109,16 @@ def begin_interaction():
 						responseString, finished = messageResponse(witResult, userID)
 					else:
 						responseString = responseprocess.randomNegative()
+					
+					flacrecord.calibrate_input_threshold()
 					googleTTS(responseString)
 			else:
 				responseString = responseprocess.randomNegative()
+				flacrecord.calibrate_input_threshold()
 				googleTTS(responseString)
 		else:
 				responseString = responseprocess.randomNegative()
+				flacrecord.calibrate_input_threshold()
 				googleTTS(responseString)
 
 def users_found(self):

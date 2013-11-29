@@ -69,7 +69,7 @@ def averageLevel(sliding_window):
 
 def listen_for_block_of_speech():
 
-	calibrate_input_threshold()
+	#calibrate_input_threshold()
 
 	#config
 	global THRESHOLD
