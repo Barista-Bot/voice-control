@@ -1,5 +1,6 @@
 import roslib; roslib.load_manifest('coffee_machine_control')
 from flacrecord import listen_for_block_of_speech
+from flacrecord import calibrate_input_threshold
 from googlewebspeech import stt_google_wav
 from witapi import witLookup
 from googletext2speech import googleTTS
@@ -42,11 +43,12 @@ def randomNegative():
 	responses = ["I'm sorry, I didn't hear you", "Sorry, I didn't catch that", "Sorry I didn't get that", "I didn't hear you", "I didn't get that", "I couldn't make that out"]
 	return responses[randint(0, len(responses) - 1)]
 
-def confirmation(response):
+def confirmation(response, stream):
 	witResult = {"intent" : None}
 	while not (witResult["intent"] in ["affirmative", "negative"]):
+		calibrate_input_threshold(stream)
 		googleTTS(response)
-		flac_file = listen_for_block_of_speech()
+		flac_file = listen_for_block_of_speech(stream)
 		hypothesis = stt_google_wav(flac_file)
 		if not hypothesis == []:
 			witResult = witLookup(hypothesis)
@@ -58,7 +60,7 @@ def confirmation(response):
 	return False	
 
 
-def messageResponse(witResult, userId):
+def messageResponse(witResult, userId, stream):
 	baristaDB.OpenDatabase(DatabaseName)
 	baristaDB.SetTime(userId)
 	print "Got UserId " + str(userId) 
@@ -74,7 +76,7 @@ def messageResponse(witResult, userId):
 			if (witResult["intent"] == "hello"):
 				UID_client.definePerson(userId)
 				response = "Hello would you like a coffee?"
-				confirm = confirmation(response)
+				confirm = confirmation(response, stream)
 				if confirm:
 					googleTTS("What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha")
 					response = "Which type would you like?"
@@ -86,7 +88,7 @@ def messageResponse(witResult, userId):
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = "You have ordered a" + witResult["entities"]["Coffee"]["value"] + " is that correct??"
-						confirm = confirmation(response)
+						confirm = confirmation(response, stream)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
 							baristaDB.SetCoffeePreference(userId, coffee_request)
@@ -115,7 +117,7 @@ def messageResponse(witResult, userId):
 				if "contact" in witResult["entities"]:
 					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". would you like a coffee?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 					else:
@@ -128,7 +130,7 @@ def messageResponse(witResult, userId):
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; is that correct??"
-						confirm = confirmation(response)
+						confirm = confirmation(response, stream)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
 							baristaDB.SetCoffeePreference(userId, coffee_request)
@@ -165,7 +167,7 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Negative_Emotion" in witResult["entities"]:
 					response = "That's a shame, would you like a coffee to make you feel better " + baristaDB.GetUserName(userId)
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
@@ -175,7 +177,7 @@ def messageResponse(witResult, userId):
 				elif "Positive_Emotion" in witResult["entities"]:
 					UID_client.definePerson(userId)
 					response = "That's great, would a coffee make you feel even better?" + baristaDB.GetUserName(userId)
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
@@ -185,7 +187,7 @@ def messageResponse(witResult, userId):
 			elif(witResult["intent"] == "feeling_question"):
 				if "Self" in witResult["entities"]:
 					response = "I'm pretty good thanks - Brewing Coffee makes me happy! Can I get you a coffee?"
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
@@ -198,7 +200,7 @@ def messageResponse(witResult, userId):
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; is that correct??"
-						confirm = confirmation(response)
+						confirm = confirmation(response, stream)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
 							baristaDB.SetCoffeePreference(userId, coffee_request)
@@ -238,11 +240,11 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Negative_Emotion" in witResult["entities"]:
 					response = "That's frustrating, would you like a coffee to improve your day? " + baristaDB.GetUserName(userId)
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						if baristaDB.GetCoffeePreference(userId) != "":
 							response = "So," + baristaDB.GetUserName(userId) + ", would you like another" + baristaDB.GetCoffeePreference(userId) +"?"
-							confirm = confirmation(response)	
+							confirm = confirmation(response, stream)	
 							if confirm:
 								coffee_request = witResult["entities"]["Coffee"]["value"]
 								baristaDB.SetCoffeePreference(userId, coffee_request)
@@ -258,11 +260,11 @@ def messageResponse(witResult, userId):
 				elif "Positive_Emotion" in witResult["entities"]:
 					UID_client.definePerson(userId)
 					response = "That's great, would you like a coffee to improve your productivity?" + baristaDB.GetUserName(userId)
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						if baristaDB.GetCoffeePreference(userId) != "":
 							response = "So," + baristaDB.GetUserName(userId) + ", would you like another" + baristaDB.GetCoffeePreference(userId) +"?"
-							confirm = confirmation(response)	
+							confirm = confirmation(response, stream)	
 							if confirm:
 								coffee_request = witResult["entities"]["Coffee"]["value"]
 								baristaDB.SetCoffeePreference(userId, coffee_request)
@@ -279,7 +281,7 @@ def messageResponse(witResult, userId):
 				UID_client.definePerson(userId)
 				if "Self" in witResult["entities"]:
 					response = "I'm pretty good thanks - Brewing Coffee makes me happy! Can I get you a coffee?"
-					confirm = confirmation(response)
+					confirm = confirmation(response, stream)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
@@ -291,7 +293,7 @@ def messageResponse(witResult, userId):
 				if "Coffee" in witResult["entities"]:
 					if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
 						response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "; is that correct??"
-						confirm = confirmation(response)
+						confirm = confirmation(response, stream)
 						if confirm:
 							coffee_request = witResult["entities"]["Coffee"]["value"]
 							baristaDB.SetCoffeePreference(userId, coffee_request)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import pyaudio
 import wave
 import audioop
@@ -8,6 +9,23 @@ import time
 import globalvariables
 from globalvariables import *
 
+def open_stream():
+	global p
+	p = pyaudio.PyAudio()
+	try:
+		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
+	except IOError, e:
+		if e.args[1] == pyaudio.paInvalidSampleRate:
+			globalvariables.SAMPLERATE = 44100
+			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
+		else:
+			raise
+	return stream
+
+def close_stream(stream):
+	global p
+	stream.close()
+	p.terminate()
 
 def find_input_device(pyaudio):
         device_index = None            
@@ -26,35 +44,26 @@ def find_input_device(pyaudio):
 
         return device_index
 
-def calibrate_input_threshold():
-	#open stream
-	p = pyaudio.PyAudio()
-
+def calibrate_input_threshold(stream):
+	try:
+		stream.start_stream()
+	except:
+		pass
 	print "-----------Calibrating audio stream threshold-----------"
 	noise = 0
 	noiseTotal = 0
-	try:
-		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
-	except IOError, e:
-		if e.args[1] == pyaudio.paInvalidSampleRate:
-			globalvariables.SAMPLERATE = 44100
-			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
-		else:
-			raise
 
 	for i in range(CALIBRATION_RANGE):
 		data = stream.read(CHUNK)
 		noiseTotal += abs(audioop.avg(data, 2))
-
-	stream.close()
-	p.terminate()
 	
 	noise = (noiseTotal / CALIBRATION_RANGE)
 	noise *= THRESHOLD_AMPLIFICATION
 	print "-----------Setting calibration level to " + str(noise) + "-----------"
 	global THRESHOLD
 	THRESHOLD = noise
-	
+	stream.stop_stream()
+		
 
 def cancel_interaction():
 	global finished
@@ -67,16 +76,13 @@ def averageLevel(sliding_window):
 
 	return (noise / len(sliding_window))
 
-def listen_for_block_of_speech():
+def listen_for_block_of_speech(stream):
 
-	#calibrate_input_threshold()
+	calibrate_input_threshold(stream)
 
 	#config
 	global THRESHOLD
 	#THRESHOLD = 50
-
-	#open stream
-	p = pyaudio.PyAudio()
 
 	all_m = []
 	data = ''
@@ -86,22 +92,17 @@ def listen_for_block_of_speech():
 	started = False
 	global finished
 	finished = False
-
+	
 	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstart.wav'))
 	
-	time.sleep(0.2)
+	time.sleep(0.35)
 
-	try:
-		stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
-	except IOError, e:
-		if e.args[1] == pyaudio.paInvalidSampleRate:
-			globalvariables.SAMPLERATE = 44100
-			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
-		else:
-			raise
+	
 	globalvariables.PRE_SAMPLES=0.5*rel
 	startTime = time.time()
-
+	stream.start_stream()
+	startSilence = False
+	startSilentTime = time.time()
 	while (not finished):
 		try:
 			data = stream.read(CHUNK)
@@ -116,6 +117,7 @@ def listen_for_block_of_speech():
 		print "Average of window: " + str(average) + " threshold: " + str(THRESHOLD)
 		print "Time Elapsed: " + str(currTime - startTime) 
 		if(average > THRESHOLD):
+			startSilence = False
 			if(not started):
 				print("starting to record")
 				started = True
@@ -128,6 +130,26 @@ def listen_for_block_of_speech():
 					wav_filename = save_speech(all_m,p)
 					flac_filename = convert_wav_to_flac(wav_filename)
 					started = False
+					finished = True
+		elif (startSilence):
+			all_m.append(data)
+			if(currTime - startSilentTime > .5):
+				print "-----------Stopped recording due to timeout-----------"
+				wav_filename = save_speech(all_m,p)
+				flac_filename = convert_wav_to_flac(wav_filename)
+				started = False
+				finished = True
+		elif (average <= THRESHOLD):
+			if(started):
+				all_m.append(data)
+				startSilentTime = time.time()
+				startSilence = True
+			else:
+				if len(all_m) > PRE_SAMPLES:
+					all_m.pop(0)
+				all_m.append(data)
+				if not started and (currTime - startTime > 10 ):
+					print "--------Stopped recording as nothing heard--------"
 					finished = True
 		elif (started==True):
 			print "-----------Stopped recording-----------"
@@ -142,16 +164,13 @@ def listen_for_block_of_speech():
 			if (not started and (currTime - startTime > 10)):
 				print "----------Stopped recording as nothing heard----------"
 				finished = True
-
-	stream.close()
-	p.terminate()
-
+	stream.stop_stream()
 	play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'raw/soundstop.wav'))
-
+	
 	if 'flac_filename' in locals():
 		return flac_filename
 	else:
-		return []
+		return ""
 
 def save_speech(data, p):
     filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),'output_'+str(int(time.time())))
@@ -175,6 +194,7 @@ def convert_wav_to_flac(filename):
 FLAC_CONV = 'flac -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
     # Unit test when module is run
-    filename = listen_for_block_of_speech()
+    stream = open_stream()
+    filename = listen_for_block_of_speech(stream)
     os.system('mplayer ' + filename)
     os.remove(filename)

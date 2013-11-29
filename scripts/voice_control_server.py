@@ -49,9 +49,9 @@ def identify_user():
 		
 		waitingForUser = not person_result.is_person
 
-def begin_interaction():
+def begin_interaction(stream):
 	global finished, Paused, pub_speech
-	flacrecord.calibrate_input_threshold()
+	flacrecord.calibrate_input_threshold(stream)
 	googleTTS("Hello there!  Speak clearly, towards the microphone")
 	googleTTS("speak after the tone")
 	Paused = False
@@ -60,7 +60,7 @@ def begin_interaction():
 	while not finished:
 		while (Paused):
 			pass
-		flac_file = listen_for_block_of_speech()
+		flac_file = listen_for_block_of_speech(stream)
 		if finished:
 			break
 		if finished:
@@ -106,26 +106,27 @@ def begin_interaction():
 					witResult = witLookup(hypothesis)
 					if not witResult == []:
 						global userID
-						responseString, finished = messageResponse(witResult, userID)
+						responseString, finished = messageResponse(witResult, userID, stream)
 					else:
 						responseString = responseprocess.randomNegative()
 					
-					flacrecord.calibrate_input_threshold()
+					flacrecord.calibrate_input_threshold(stream)
 					googleTTS(responseString)
 			else:
 				responseString = responseprocess.randomNegative()
-				flacrecord.calibrate_input_threshold()
+				flacrecord.calibrate_input_threshold(stream)
 				googleTTS(responseString)
 		else:
 				responseString = responseprocess.randomNegative()
-				flacrecord.calibrate_input_threshold()
+				flacrecord.calibrate_input_threshold(stream)
 				googleTTS(responseString)
 
 def users_found(self):
+	stream = flacrecord.open_stream()
 	identify_user()
 	print "Beginning Interaction"
-	begin_interaction()
- 
+	begin_interaction(stream)
+ 	flacrecord.close_stream(stream)
 	return True
 
 def userPresenceChange(message):
@@ -165,7 +166,6 @@ def voice_control_server():
 	rospy.Service('/voice_control/calibrate', std_srvs.srv.Empty, calibrate_callback)
 
 	rospy.Subscriber('~commands', String, pause_callback)
-	flacrecord.calibrate_input_threshold()
 	rospy.spin()
 
 if __name__ == "__main__":
