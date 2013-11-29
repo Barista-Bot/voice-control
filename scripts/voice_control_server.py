@@ -9,8 +9,10 @@ from googletext2speech import play_wav
 from user_identification import client as UID_client
 import user_identification
 import flacrecord
+import responseprocess
 
 from std_msgs.msg import String
+import std_srvs.srv
 
 from voice_control.srv import *
 import rospy, time, os, baristaDB
@@ -69,7 +71,7 @@ def begin_interaction():
 				break
 			if not hypothesis == []:
 				print "I heard: " + hypothesis
-				pub_speech(hypothesis)
+				pub_speech.publish(hypothesis)
 				if hypothesis.lower() == "what does the fox say":
 					play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
 				elif hypothesis.lower() == "do you have a license":
@@ -137,6 +139,10 @@ def pause_callback(message):
 	else:
 		Paused = False
 
+def calibrate_callback(in_data):
+	flacrecord.calibrate_input_threshold()
+	std_srvs.srv.EmptyResponse()
+	
 
 def voice_control_server():
 	global userCount, finished
@@ -152,9 +158,10 @@ def voice_control_server():
 	#UID_client.subscribe(userPresenceChange)
 
 	rospy.Service('voice_control', voice_control, users_found)
+	rospy.Service('/voice_control/calibrate', std_srvs.srv.Empty, calibrate_callback)
 
 	rospy.Subscriber('~commands', String, pause_callback)
-
+	flacrecord.calibrate_input_threshold()
 	rospy.spin()
 
 if __name__ == "__main__":

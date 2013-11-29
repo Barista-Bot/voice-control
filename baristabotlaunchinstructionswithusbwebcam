@@ -1,0 +1,5 @@
+roslaunch barista_bot camera.launch 
+rosparam set /user_identification/videosource "RosVideoSource2"
+rosrun user_identification user_identification_server.py
+rosrun voice_interaction voice_interaction_server.py
+rosrun voice_interaction voice_interaction_client.py

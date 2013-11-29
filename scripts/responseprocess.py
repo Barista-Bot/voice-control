@@ -8,6 +8,7 @@ import sys
 import baristaDB
 import rospy
 from user_identification import client as UID_client
+from random import randint
 from coffee_machine_control.srv import *
 DatabaseName = "baristaDB.db"
 
@@ -39,7 +40,7 @@ def validCoffeeChoice(coffeeType):
 
 def randomNegative():
 	responses = ["I'm sorry, I didn't hear you", "Sorry, I didn't catch that", "Sorry I didn't get that", "I didn't hear you", "I didn't get that", "I couldn't make that out"]
-	return responses[randint(0, len(responses))]
+	return responses[randint(0, len(responses) - 1)]
 
 def confirmation(response):
 	witResult = {"intent" : None}
@@ -163,7 +164,7 @@ def messageResponse(witResult, userId):
 			elif(witResult["intent"] == "emotion"):
 				UID_client.definePerson(userId)
 				if "Negative_Emotion" in witResult["entities"]:
-					response = "That's a shame, would you like a coffee to make you fell better " + baristaDB.GetUserName(userId)
+					response = "That's a shame, would you like a coffee to make you feel better " + baristaDB.GetUserName(userId)
 					confirm = confirmation(response)
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"

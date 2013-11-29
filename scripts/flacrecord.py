@@ -99,7 +99,7 @@ def listen_for_block_of_speech():
 			stream = p.open(format = FORMAT, channels = CHANNELS, rate = SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = CHUNK)
 		else:
 			raise
-
+	globalvariables.PRE_SAMPLES=0.5*rel
 	startTime = time.time()
 
 	while (not finished):
@@ -111,22 +111,24 @@ def listen_for_block_of_speech():
 				data = '\x00'*CHUNK
 			else:
 				raise
-		slid_win.append (abs(audioop.avg(data, 2)))
+		slid_win.append(abs(audioop.avg(data, 2)))
 		average = averageLevel(slid_win)
 		print "Average of window: " + str(average) + " threshold: " + str(THRESHOLD)
-
+		print "Time Elapsed: " + str(currTime - startTime) 
 		if(average > THRESHOLD):
 			if(not started):
 				print("starting to record")
 				started = True
 				all_m.append(data)
 				startTime = time.time()
-			elif (started and (currTime - startTime > 15)):
-				print "-----------Stopped recording due to timeout-----------"
-				wav_filename = save_speech(all_m,p)
-				flac_filename = convert_wav_to_flac(wav_filename)
-				started = False
-				finished = True
+			else:
+				all_m.append(data)
+				if(currTime - startTime > 15):
+					print "-----------Stopped recording due to timeout-----------"
+					wav_filename = save_speech(all_m,p)
+					flac_filename = convert_wav_to_flac(wav_filename)
+					started = False
+					finished = True
 		elif (started==True):
 			print "-----------Stopped recording-----------"
 			wav_filename = save_speech(all_m,p)
@@ -137,7 +139,8 @@ def listen_for_block_of_speech():
 			if len(all_m) > PRE_SAMPLES:
 				all_m.pop(0)
 			all_m.append(data)
-			if (currTime - startTime > 20):
+			if (not started and (currTime - startTime > 10)):
+				print "----------Stopped recording as nothing heard----------"
 				finished = True
 
 	stream.close()
@@ -157,7 +160,7 @@ def save_speech(data, p):
     wf = wave.open(filename+'.wav', 'wb')
     wf.setnchannels(1)
     wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.setframerate(44100)
+    wf.setframerate(SAMPLERATE)
     wf.writeframes(data)
     wf.close()
     return filename
