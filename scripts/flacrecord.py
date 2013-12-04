@@ -10,6 +10,7 @@ import globalvariables
 #from globalvariables import *
 import rospy
 from face.msg import faceRequests
+from user_identification import client as faceidclient
 
 def open_stream():
 	global p
@@ -18,10 +19,17 @@ def open_stream():
 		stream = p.open(format = globalvariables.FORMAT, channels = globalvariables.CHANNELS, rate = globalvariables.SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = globalvariables.SAMPLES_PER_CHUNK)
 	except IOError, e:
 		if e.args[1] == pyaudio.paInvalidSampleRate:
-			globalvariables.globalvariables.SAMPLERATE = 44100
+			globalvariables.SAMPLERATE = 44100
 			stream = p.open(format = globalvariables.FORMAT, channels = globalvariables.CHANNELS, rate = globalvariables.SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = globalvariables.SAMPLES_PER_CHUNK)
 		else:
 			raise
+
+	def face_id_callback(msg):
+		global visual_talkingness
+		visual_talkingness = msg.talkingness
+
+	faceidclient.subscribe(face_id_callback)
+
 	return stream
 
 def close_stream(stream):
@@ -94,12 +102,12 @@ def listen_for_block_of_speech(stream):
 
 	global interaction_cancelled
 
+	THRESHOLD = 200
 	print "THRESHOLD", THRESHOLD
 
+
 	full_recording = []
-	max_recording_chunks = 15 * globalvariables.CHUNKS_PER_SECOND
-	slid_win = deque(maxlen=globalvariables.MAX_SLID_WIN_LEN)
-	slid_win.extend([0]*globalvariables.MAX_SLID_WIN_LEN)
+	max_recording_chunks = 8 * globalvariables.CHUNKS_PER_SECOND
 	recording_started = False
 	interaction_cancelled = False
 	face_controller = FaceController()
@@ -123,12 +131,10 @@ def listen_for_block_of_speech(stream):
 				chunk_data = '\x00'*globalvariables.SAMPLES_PER_CHUNK
 			else:
 				raise
-		slid_win.append(abs(audioop.avg(chunk_data, 2)))
 		full_recording.append(chunk_data)
-		slid_win_average = averageLevel(slid_win)
-		print "Average of window: " + str(slid_win_average) + " threshold: " + str(THRESHOLD)
 
-		if slid_win_average <= THRESHOLD:
+		print "Visual talkingness: " + str(visual_talkingness) + " threshold: " + str(THRESHOLD)
+		if visual_talkingness <= THRESHOLD:
 			if recording_started:
 				print "-----------Stopped recording due to stopped speaking-----------"
 				break
