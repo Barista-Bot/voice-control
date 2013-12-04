@@ -150,7 +150,7 @@ def messageResponse(witResult, userId, stream):
 #************************************** LEVEL 2  ****************************************
 
 #Need to add weather
-		elif (level == 2):
+		elif (level == 2 or level==3):
 
 			if (witResult["intent"] == "hello"):
 				response = "Hi, I'm Barista Bot.  What's your name?" 
@@ -218,8 +218,8 @@ def messageResponse(witResult, userId, stream):
 				response = "I'm sorry, could you repeat that?"
 				UID_client.definePerson(userId)
 
-#************************************** LEVEL 3  ****************************************
-		else:
+#************************************** LEVEL 4  ****************************************
+		elif(level == 4):
 
 			if (witResult["intent"] == "hello"):
 				UID_client.definePerson(userId)
