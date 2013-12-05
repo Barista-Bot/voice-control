@@ -150,7 +150,7 @@ def messageResponse(witResult, userId, stream):
 #************************************** LEVEL 2  ****************************************
 
 #Need to add weather
-		elif (level == 2 or level==3):
+		elif (level == 2):
 
 			if (witResult["intent"] == "hello"):
 				response = "Hi, I'm Barista Bot.  What's your name?" 
@@ -219,18 +219,18 @@ def messageResponse(witResult, userId, stream):
 				UID_client.definePerson(userId)
 
 #************************************** LEVEL 4  ****************************************
-		elif(level == 4):
+		elif(level == 3):
 
 			if (witResult["intent"] == "hello"):
 				UID_client.definePerson(userId)
-				if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "" and baristaDB.GetCourse(userId) != "":
-					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + "How is " + GetCourse(userId) + "going?"					
+				if baristaDB.UserExists(userId) and baristaDB.GetUserName(userId) != "":
+					response = "Hello there, nice to see you again " + baristaDB.GetUserName(userId) + ". How are you today?"					
 				else:	
 					response = "Hello there, it's a pleasure to meet you, what's your name?"
 			elif (witResult["intent"] == "name"):
 				UID_client.definePerson(userId)
 				if "contact" in witResult["entities"]:
-					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". What course do you do?"
+					response = "It's nice to meet you, " + witResult["entities"]["contact"]["value"] + ". How are you?"
 					baristaDB.SetUserName(userId, witResult["entities"]["contact"]["value"])					
 				else:
 					response = "I'm sorry, I didn't catch your name"
@@ -239,7 +239,7 @@ def messageResponse(witResult, userId, stream):
 			elif(witResult["intent"] == "emotion"):
 				UID_client.definePerson(userId)
 				if "Negative_Emotion" in witResult["entities"]:
-					response = "That's frustrating, would you like a coffee to improve your day? " + baristaDB.GetUserName(userId)
+					response = "That's unfortunate, would you like a coffee to improve your day? " + baristaDB.GetUserName(userId)
 					confirm = confirmation(response, stream)
 					if confirm:
 						if baristaDB.GetCoffeePreference(userId) != "":

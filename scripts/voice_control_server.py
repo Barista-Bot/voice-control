@@ -52,8 +52,7 @@ def identify_user():
 def begin_interaction(stream):
 	global finished, Paused, pub_speech
 	flacrecord.calibrate_input_threshold(stream)
-	googleTTS("Hello there!  Speak clearly, towards the microphone")
-	googleTTS("speak after the tone")
+	googleTTS("Hello there! After the tone, please speak clearly towards my face")
 	Paused = False
 	finished = False
 
