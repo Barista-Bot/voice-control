@@ -81,7 +81,7 @@ def messageResponse(witResult, userId, stream):
 					googleTTS("What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha")
 					response = "Which type would you like?"
 				else:
-					#finished = True
+					finished = True
 					response = "Unfortunately I can only offer you coffee, I hope you have a nice day - Good Bye"
 			
 			elif (witResult["intent"] == "coffee_question"):
@@ -102,7 +102,7 @@ def messageResponse(witResult, userId, stream):
 						response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 				
 			elif (witResult["intent"] == "finished"):
-				#finished = True
+				finished = True
 				response = "That's great.  Goodbye"
 			else:
 				response = "I'm sorry, could you repeat that?"
@@ -124,7 +124,7 @@ def messageResponse(witResult, userId, stream):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
 					else:
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
 				else:
 					response = "I'm sorry, I didn't catch your name"
@@ -148,7 +148,7 @@ def messageResponse(witResult, userId, stream):
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
 				
 			elif (witResult["intent"] == "finished"):
-				#finished = True
+				finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 				response = "I'm sorry, could you repeat that?"
@@ -181,7 +181,7 @@ def messageResponse(witResult, userId, stream):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
 
 				elif "Positive_Emotion" in witResult["entities"]:
@@ -191,7 +191,7 @@ def messageResponse(witResult, userId, stream):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
 			elif(witResult["intent"] == "feeling_question"):
@@ -201,7 +201,7 @@ def messageResponse(witResult, userId, stream):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
 
@@ -220,7 +220,7 @@ def messageResponse(witResult, userId, stream):
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
 				
 			elif (witResult["intent"] == "finished"):
-				#finished = True
+				finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 			
@@ -271,7 +271,7 @@ def messageResponse(witResult, userId, stream):
 						else:	
 							response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
 
 				elif "Positive_Emotion" in witResult["entities"]:
@@ -291,7 +291,7 @@ def messageResponse(witResult, userId, stream):
 						else:	
 							response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:						
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
 			
 			elif(witResult["intent"] == "feeling_question"):
@@ -302,7 +302,7 @@ def messageResponse(witResult, userId, stream):
 					if confirm:
 						response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
 					else:
-						#finished = True
+						finished = True
 						response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"			
 
 			elif (witResult["intent"] == "request"):
@@ -319,7 +319,7 @@ def messageResponse(witResult, userId, stream):
 					response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Which would you like?"
 				
 			elif (witResult["intent"] == "finished"):
-				#finished = True
+				finished = True
 				response = "That's great. Goodbye " + baristaDB.GetUserName(userId)
 			else:
 				response = "I'm sorry, could you repeat that?"

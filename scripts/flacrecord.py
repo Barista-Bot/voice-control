@@ -57,8 +57,6 @@ def open_stream():
         else:
             raise
 
-    init_faceid_subscription()
-    init_ros_override_services()
     return stream
 
 def close_stream(stream):
@@ -222,6 +220,8 @@ if(__name__ == '__main__'):
     # Unit test when module is run
     rospy.init_node("flac_record")
     stream = open_stream()
+    init_faceid_subscription()
+    init_ros_override_services()
     # calibrate_input_threshold(stream)
     filename = listen_for_block_of_speech(stream)
     if filename:

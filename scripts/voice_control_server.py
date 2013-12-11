@@ -58,7 +58,7 @@ def begin_interaction(stream):
     Paused = False
     finished = False
 
-    while not finished:
+    while not finished and not rospy.is_shutdown():
         while (Paused):
             pass
         flac_file = listen_for_block_of_speech(stream)
@@ -128,7 +128,7 @@ def begin_interaction(stream):
             flacrecord.calibrate_input_threshold(stream)
             googleTTS(responseString)
 
-def users_found(self):
+def startInteraction():
     stream = flacrecord.open_stream()
     identify_user()
     print "Beginning Interaction"
@@ -168,12 +168,17 @@ def wit_override_callback(ros_msg):
     global witResultOverride
     witResultOverride = msg
     
+def requestInteractionStartCallback(d):
+    global start_requested
+    start_requested = True
+    return True
 
 def voice_control_server():
-    global userCount, finished, witResultOverride
+    global userCount, finished, witResultOverride, start_requested
     userCount = 1
     finished = True
     witResultOverride = None
+    start_requested = False
 
     rospy.init_node('voice_control')
 
@@ -183,13 +188,24 @@ def voice_control_server():
 
     #UID_client.subscribe(userPresenceChange)
 
-    rospy.Service('voice_control', voice_control, users_found)
+    rospy.Service('voice_control', voice_control, requestInteractionStartCallback)
     rospy.Service('/voice_control_server/calibrate', std_srvs.srv.Empty, calibrate_callback)
 
     rospy.Subscriber('/voice_control_server/wit_override', String, wit_override_callback)
 
-    rospy.Subscriber('~commands', String, pause_callback)
-    rospy.spin()
+    rospy.Subscriber('/voice_control_server/commands', String, pause_callback)
+
+    flacrecord.init_faceid_subscription()
+    flacrecord.init_ros_override_services()
+    
+    while not rospy.is_shutdown():
+        if start_requested:
+            startInteraction()
+            start_requested = False
+        else:
+            time.sleep(0.5)
+            print "Waiting to start"
+
 
 if __name__ == "__main__":
     global userID, interactionLevel
