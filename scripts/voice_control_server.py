@@ -137,7 +137,7 @@ def userPresenceChange(message):
 			rospy.loginfo(rospy.get_name() + ": User Lost. Terminating")
 
 def pause_callback(message):
-	global Paused
+	global Paused, finished
 	if (message.data == 'pause'):
 		Paused = True
 	elif (message.data == 'stop'):
