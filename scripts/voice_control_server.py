@@ -125,7 +125,7 @@ def users_found(self):
 	identify_user()
 	print "Beginning Interaction"
 	begin_interaction(stream)
- 	flacrecord.close_stream(stream)
+	flacrecord.close_stream(stream)
 	return True
 
 def userPresenceChange(message):
@@ -137,9 +137,11 @@ def userPresenceChange(message):
 			rospy.loginfo(rospy.get_name() + ": User Lost. Terminating")
 
 def pause_callback(message):
-	global Paused
+	global Paused, finished
 	if (message.data == 'pause'):
 		Paused = True
+	elif (message.data == 'stop'):
+		finished = True
 	else:
 		Paused = False
 
