@@ -125,7 +125,7 @@ def users_found(self):
 	identify_user()
 	print "Beginning Interaction"
 	begin_interaction(stream)
- 	flacrecord.close_stream(stream)
+	flacrecord.close_stream(stream)
 	return True
 
 def userPresenceChange(message):
