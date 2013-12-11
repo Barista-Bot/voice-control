@@ -140,6 +140,8 @@ def pause_callback(message):
 	global Paused
 	if (message.data == 'pause'):
 		Paused = True
+	elif (message.data == 'stop'):
+		finished = True
 	else:
 		Paused = False
 
