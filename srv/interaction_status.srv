@@ -1,0 +1,5 @@
+---
+bool is_active
+int32 level
+int64 user_id
+string user_name

@@ -54,8 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
-   voice_control.srv
-   calibrate.srv
+   interaction_status.srv
  )
 
 ## Generate actions in the 'action' folder

@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import os
 import urllib2
 from globalvariables import *
@@ -20,7 +21,14 @@ def stt_google_wav(filename):
     googl_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=6'%(lang_code)
     hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate='+str(SAMPLERATE)}
     req = urllib2.Request(googl_speech_url, data=flac_cont, headers=hrs)
-    p = urllib2.urlopen(req)
+    for i in range(3):
+        try:
+            p = urllib2.urlopen(req)
+            break
+        except urllib2.HTTPError:
+            pass
+    else:
+        raise Exception('Could not contact speech recognition URL')
     try:
     	hypotheses = eval(p.read())['hypotheses']
     	#print hypotheses

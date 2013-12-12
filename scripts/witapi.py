@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 from StringIO import StringIO
 import pycurl, urllib, json
 

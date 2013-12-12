@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 from flacrecord import listen_for_block_of_speech
 from googlewebspeech import stt_google_wav
 from witapi import witLookup
-from responseprocess import messageResponse
 from googletext2speech import googleTTS
 from googletext2speech import play_wav
 
@@ -14,7 +13,7 @@ import responseprocess
 from std_msgs.msg import String
 import std_srvs.srv
 
-from voice_control.srv import *
+import voice_control.srv
 import rospy, time, os, baristaDB
 import ast
 
@@ -51,8 +50,8 @@ def identify_user():
         waitingForUser = not person_result.is_person
 
 def begin_interaction(stream):
-    global finished, Paused, pub_speech
-    global userID, witResultOverride
+    global finished, Paused, userID, witResultOverride
+
     flacrecord.calibrate_input_threshold(stream)
     googleTTS("Greetings! After the tone, please speak clearly towards my face. Don't forget to say Hello!")
     Paused = False
@@ -64,21 +63,19 @@ def begin_interaction(stream):
         flac_file = listen_for_block_of_speech(stream)
         if finished:
             break
-        if finished:
-            break
         if not flac_file == []:
             if finished:
                 break
-            if witResultOverride:
-                pub_speech.publish(str(witResultOverride))
-                responseString, finished = messageResponse(witResultOverride, userID, stream)
+            override = witResultOverride
+            witResultOverride = None
+            if override:
+                pub_speech.publish(str(override))
+                responseString, finished = responseprocess.messageResponse(override, userID, stream)
                 print responseString
-                witResultOverride = None
                 googleTTS(responseString)
             else:
                 hypothesis = stt_google_wav(flac_file)
                 if hypothesis:
-                    print "I heard:", hypothesis
                     pub_speech.publish(hypothesis)
                     if hypothesis.lower() == "what does the fox say":
                         play_wav(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'easter_eggs/fox.wav'))
@@ -113,7 +110,7 @@ def begin_interaction(stream):
                     else :
                         witResult = witLookup(hypothesis)
                         if witResult != []:
-                            responseString, finished = messageResponse(witResult, userID, stream)
+                            responseString, finished = responseprocess.messageResponse(witResult, userID, stream)
                         else:
                             responseString = responseprocess.randomNegative()
                         
@@ -153,54 +150,75 @@ def pause_callback(message):
     else:
         Paused = False
 
-def calibrate_callback(in_data):
+def calibrateCallback(in_data):
     flacrecord.calibrate_input_threshold()
-    std_srvs.srv.EmptyResponse()
+    return std_srvs.srv.EmptyResponse()
 
-def wit_override_callback(ros_msg):
+def witOverrideCallback(ros_msg):
     print "override callback called with", ros_msg.data
-    msg = None
+    dict_msg = None
     try:
-        msg = ast.literal_eval(ros_msg.data)
-        print msg
+        dict_msg = ast.literal_eval(ros_msg.data)
+        print dict_msg
     except ValueError:
         print "Malformed string"
     global witResultOverride
-    witResultOverride = msg
+    witResultOverride = dict_msg
     
-def requestInteractionStartCallback(d):
+def requestInteractionStartCallback(in_data):
     global start_requested
     start_requested = True
-    return True
+    return std_srvs.srv.EmptyResponse()
+
+def interactionStatusCallback(in_data):
+    response_dict = {
+        'is_active': interaction_is_active,
+    }
+    for t, key in [(int, 'level'), (int, 'user_id'), (str, 'user_name')]:
+        try:   
+            response_dict[key] = responseprocess.interaction_status[key]
+        except KeyError:
+            if t == str:
+                response_dict[key] = ''
+            else:
+                response_dict[key] = -1
+
+    return voice_control.srv.interaction_statusResponse(**response_dict)
 
 def voice_control_server():
-    global userCount, finished, witResultOverride, start_requested
+    global userCount, finished, witResultOverride, start_requested, pub_speech, interaction_is_active
+
     userCount = 1
     finished = True
     witResultOverride = None
     start_requested = False
+    interaction_is_active = False
 
     rospy.init_node('voice_control')
 
-    rospy.Subscriber('/voice_control_server/say', String, sayCallback)
-    global pub_speech
-    pub_speech = rospy.Publisher('/voice_control_server/speech', String)
+    rospy.Subscriber('/voice_control/say', String, sayCallback)
+    pub_speech = rospy.Publisher('/voice_control/speech', String)
 
     #UID_client.subscribe(userPresenceChange)
 
-    rospy.Service('voice_control', voice_control, requestInteractionStartCallback)
-    rospy.Service('/voice_control_server/calibrate', std_srvs.srv.Empty, calibrate_callback)
+    rospy.Service('voice_control/start', std_srvs.srv.Empty, requestInteractionStartCallback)
+    rospy.Service('/voice_control/calibrate', std_srvs.srv.Empty, calibrateCallback)
+    rospy.Service('/voice_control/interaction_status', voice_control.srv.interaction_status, interactionStatusCallback)
 
-    rospy.Subscriber('/voice_control_server/wit_override', String, wit_override_callback)
+    rospy.Subscriber('/voice_control/wit_override', String, witOverrideCallback)
 
-    rospy.Subscriber('/voice_control_server/commands', String, pause_callback)
+    rospy.Subscriber('/voice_control/commands', String, pause_callback)
 
     flacrecord.init_faceid_subscription()
     flacrecord.init_ros_override_services()
+    responseprocess.passServerGlobals(globals())
     
     while not rospy.is_shutdown():
         if start_requested:
+            interaction_is_active = True
+            responseprocess.interaction_status = {}
             startInteraction()
+            interaction_is_active = False
             start_requested = False
         else:
             time.sleep(0.5)

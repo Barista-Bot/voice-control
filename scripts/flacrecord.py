@@ -159,9 +159,6 @@ def listen_for_block_of_speech(stream):
         print "Visual talkingness: " + str(visual_talkingness)
 
         if recording_started:
-            if recording_override_stop:
-                print "-----------Stopped recording due to override-----------"
-                break
             if not recording_override_start:
                 if visual_talkingness <= visual_talkingness_passive_avg:
                     print "-----------Stopped recording due to stopped speaking-----------"
@@ -178,6 +175,10 @@ def listen_for_block_of_speech(stream):
                     print "--------Stopped recording as nothing heard--------"
                     full_recording = []
                     break
+        
+        if recording_override_stop:
+            print "-----------Stopped recording due to override-----------"
+            break
 
         if len(full_recording) >= max_recording_chunks:
             print "-----------Stopped recording due to max recording length-----------"

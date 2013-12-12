@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import roslib; roslib.load_manifest('voice_control')
 
 import sys
