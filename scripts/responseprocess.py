@@ -25,7 +25,7 @@ def dispense_coffee(coffee):
     rospy.wait_for_service('coffee_machine')
     coffee_machine_control = rospy.ServiceProxy('coffee_machine', coffee_machine_control.srv.coffee_machine)
     try:
-        for Type in ["caramel", "mocha", "vanilla", "espresso"]:
+        for Type in ["caramel", "chocolate", "vanilla", "christmas"]:
             if Type in coffee.lower():
                 googleTTS("We're making your coffee now. Please wait")
                 print "Requesting a " + Type
@@ -39,7 +39,7 @@ def dispense_coffee(coffee):
         return "I'm sorry, something's gone wrong.  Please tell the Barista Bot team"
 
 def validCoffeeChoice(coffeeType):
-    for Type in ["caramel", "mocha", "vanilla", "espresso"]:
+    for Type in ["caramel", "chocolate", "vanilla", "christmas"]:
         if Type in coffeeType.lower():
             return True
     return False
@@ -93,7 +93,7 @@ def messageResponse(witResult, userId, stream):
                 response = "Hello would you like a coffee?"
                 confirm = confirmation(response, stream)
                 if confirm:
-                    googleTTS("What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha")
+                    googleTTS("Which coffee would you like, we have Caramel, Vanilla, Christmas and chocolate coffees?")
                     response = "Which type would you like?"
                 else:
                     finished = True
@@ -101,20 +101,24 @@ def messageResponse(witResult, userId, stream):
             
             elif (witResult["intent"] == "coffee_question"):
                 UID_client.definePerson(userId)
-                googleTTS("What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha")
+                googleTTS("Which coffee would you like, we have Caramel, Vanilla, Christmas and chocolate coffees?")
                 response = "Which type would you like?"
 
             elif(witResult["intent"] == "request"):
                 UID_client.definePerson(userId)
                 if "Coffee" in witResult["entities"]:
                     if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-                        response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "."
+                        if not "coffee" in witResult["entities"]["Coffee"]["value"]:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"] + " Coffee" 
+                        else:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"]
+                        response = baristaDB.GetUserName(userId) + " You have ordered a " + coffee_choice + "."
                         googleTTS(response)
                         coffee_request = witResult["entities"]["Coffee"]["value"]
                         baristaDB.SetCoffeePreference(userId, coffee_request)
                         response = dispense_coffee(coffee_request)
                     else:
-                        response = "What kind of coffee would you like, we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+                        response = "Which coffee would you like, we have Caramel, Vanilla, Christmas and Chocolate coffees"
                 
             elif (witResult["intent"] == "finished"):
                 finished = True
@@ -139,7 +143,7 @@ def messageResponse(witResult, userId, stream):
                     interaction_status['user_name'] = user_name
                     confirm = confirmation(response, stream)
                     if confirm:
-                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha"
+                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Christmas Coffee and chocolate"
                     else:
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -154,15 +158,19 @@ def messageResponse(witResult, userId, stream):
                 UID_client.definePerson(userId)
                 if "Coffee" in witResult["entities"]:
                     if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-                        response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "."
+                        if not "coffee" in witResult["entities"]["Coffee"]["value"]:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"] + " Coffee" 
+                        else:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"]
+                        response = baristaDB.GetUserName(userId) + " You have ordered a " + coffee_choice + "."
                         googleTTS(response)
                         coffee_request = witResult["entities"]["Coffee"]["value"]
                         baristaDB.SetCoffeePreference(userId, coffee_request)
                         response = dispense_coffee(coffee_request)
                     else:
-                        response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                        response = baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                 else:
-                    response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
+                    response = "Sorry we only offer Caramel Latte, Vanilla Latte, Christmas Coffee and Chocolate. Would you like a coffee?"
                 
             elif (witResult["intent"] == "finished"):
                 finished = True
@@ -198,7 +206,7 @@ def messageResponse(witResult, userId, stream):
                     response = "That's a shame, would you like a coffee to make you feel better " + baristaDB.GetUserName(userId)
                     confirm = confirmation(response, stream)
                     if confirm:
-                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                        response = baristaDB.GetUserName(userId) + " we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                     else:
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -208,7 +216,7 @@ def messageResponse(witResult, userId, stream):
                     response = "That's great, would a coffee make you feel even better?" + baristaDB.GetUserName(userId)
                     confirm = confirmation(response, stream)
                     if confirm:
-                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                     else:
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -218,7 +226,7 @@ def messageResponse(witResult, userId, stream):
                     response = "I'm pretty good thanks - Brewing Coffee makes me happy! Can I get you a coffee?"
                     confirm = confirmation(response, stream)
                     if confirm:
-                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                     else:
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -228,15 +236,19 @@ def messageResponse(witResult, userId, stream):
                 UID_client.definePerson(userId)
                 if "Coffee" in witResult["entities"]:
                     if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-                        response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "."
+                        if not "coffee" in witResult["entities"]["Coffee"]["value"]:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"] + " Coffee" 
+                        else:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"]
+                        response = baristaDB.GetUserName(userId) + " You have ordered a " + coffee_choice + "."
                         googleTTS(response)
                         coffee_request = witResult["entities"]["Coffee"]["value"]
                         baristaDB.SetCoffeePreference(userId, coffee_request)
                         response = dispense_coffee(coffee_request)
                     else:
-                        response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                        response = baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                 else:
-                    response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Would you like a coffee?"
+                    response = "Sorry we only offer Caramel Latte, Vanilla Latte, Christmas Coffee and chocolate. Would you like a coffee?"
                 
             elif (witResult["intent"] == "finished"):
                 finished = True
@@ -288,9 +300,9 @@ def messageResponse(witResult, userId, stream):
                                 baristaDB.SetCoffeePreference(userId, coffee_request)
                                 response = dispense_coffee(coffee_request)
                             else:
-                                response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"  
+                                response = baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"  
                         else:   
-                            response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                            response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                     else:
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -308,9 +320,9 @@ def messageResponse(witResult, userId, stream):
                                 baristaDB.SetCoffeePreference(userId, coffee_request)
                                 response = dispense_coffee(coffee_request)
                             else:
-                                response = baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"  
+                                response = baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"  
                         else:   
-                            response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                            response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                     else:                       
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"
@@ -321,7 +333,7 @@ def messageResponse(witResult, userId, stream):
                     response = "I'm pretty good thanks - Brewing Coffee makes me happy! Can I get you a coffee?"
                     confirm = confirmation(response, stream)
                     if confirm:
-                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel Latte, Vanilla Latte, Espresso and Mocha, which would you like?"
+                        response = "Today " + baristaDB.GetUserName(userId) + ", we have Caramel, Vanilla, Christmas and chocolate coffees, which would you like?"
                     else:
                         finished = True
                         response = "That's okay.  Have a great day! " + baristaDB.GetUserName(userId) + ". Good Bye"            
@@ -330,14 +342,18 @@ def messageResponse(witResult, userId, stream):
                 UID_client.definePerson(userId)
                 if "Coffee" in witResult["entities"]:
                     if(validCoffeeChoice(witResult["entities"]["Coffee"]["value"])):
-                        response = baristaDB.GetUserName(userId) + " You have ordered a " + witResult["entities"]["Coffee"]["value"] + "."
+                        if not "coffee" in witResult["entities"]["Coffee"]["value"]:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"] + " Coffee" 
+                        else:
+                            coffee_choice = witResult["entities"]["Coffee"]["value"]
+                        response = baristaDB.GetUserName(userId) + " You have ordered a " + coffee_choice + "."
                         googleTTS(response)
                         coffee_request = witResult["entities"]["Coffee"]["value"]
                         baristaDB.SetCoffeePreference(userId, coffee_request)
                         response = dispense_coffee(coffee_request)
                         
                 else:
-                    response = "Sorry we only offer Caramel Latte, Vanilla Latte, Espresso and Mocha. Which would you like?"
+                    response = "Sorry we only offer Caramel Latte, Vanilla Latte, Christmas Coffee and chocolate. Which would you like?"
                 
             elif (witResult["intent"] == "finished"):
                 finished = True
