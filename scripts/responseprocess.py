@@ -11,6 +11,7 @@ import baristaDB
 import rospy
 from user_identification import client as UID_client
 from random import randint
+import time
 import coffee_machine_control.srv
 DatabaseName = "baristaDB.db"
 
@@ -23,13 +24,13 @@ def passServerGlobals(g):
 def dispense_coffee(coffee):
     print "Waiting for Coffee Machine..."
     rospy.wait_for_service('coffee_machine')
-    coffee_machine_control = rospy.ServiceProxy('coffee_machine', coffee_machine_control.srv.coffee_machine)
+    coffee_machine_service = rospy.ServiceProxy('coffee_machine', coffee_machine_control.srv.coffee_machine)
     try:
         for Type in ["caramel", "chocolate", "vanilla", "christmas"]:
             if Type in coffee.lower():
                 googleTTS("We're making your coffee now. Please wait")
                 print "Requesting a " + Type
-                resp = coffee_machine_control(Type)
+                resp = coffee_machine_service(Type)
                 print resp
                 time.sleep(20)
                 return "Your coffee's ready, please take the cup.  Careful, it'll be hot"
