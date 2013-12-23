@@ -48,15 +48,15 @@ def init_ros_override_services():
 def open_stream():
     global p
     p = pyaudio.PyAudio()
-    try:
-        stream = p.open(format = globalvariables.FORMAT, channels = globalvariables.CHANNELS, rate = globalvariables.SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = globalvariables.SAMPLES_PER_CHUNK)
-    except IOError, e:
-        if e.args[1] == pyaudio.paInvalidSampleRate:
-            globalvariables.SAMPLERATE = 44100
-            stream = p.open(format = globalvariables.FORMAT, channels = globalvariables.CHANNELS, rate = globalvariables.SAMPLERATE, input = True, input_device_index = find_input_device(p), frames_per_buffer = globalvariables.SAMPLES_PER_CHUNK)
-        else:
-            raise
-
+    stream = p.open(
+        format = globalvariables.FORMAT,
+        channels = globalvariables.CHANNELS,
+        rate = globalvariables.SAMPLERATE,
+        input = True,
+        input_device_index = find_input_device(p),
+        frames_per_buffer = globalvariables.SAMPLES_PER_CHUNK
+    )
+    
     return stream
 
 def close_stream(stream):
@@ -66,18 +66,18 @@ def close_stream(stream):
 
 def find_input_device(pyaudio):
         device_index = None            
-        for i in range( pyaudio.get_device_count() ):     
-            devinfo = pyaudio.get_device_info_by_index(i)   
-            print( "Device %d: %s"%(i,devinfo["name"]) )
+        # for i in range( pyaudio.get_device_count() ):     
+        #     devinfo = pyaudio.get_device_info_by_index(i)   
+            # print( "Device %d: %s"%(i,devinfo["name"]) )
 
-            for keyword in []:
-                if keyword in devinfo["name"].lower():
-                    print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
-                    device_index = i
-                    return device_index
+            # for keyword in []:
+            #     if keyword in devinfo["name"].lower():
+            #         # print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
+            #         device_index = i
+            #         return device_index
 
-        if device_index == None:
-            print( "-----------No preferred input found; using default input device.-----------" )
+        # if device_index == None:
+        #     print( "-----------No preferred input found; using default input device.-----------" )
 
         return device_index
 

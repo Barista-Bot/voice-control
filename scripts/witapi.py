@@ -1,8 +1,10 @@
 #!/usr/bin/env python2
-from StringIO import StringIO
-import pycurl, urllib, json
+import StringIO
+import pycurl
+import urllib
+import json
 
-CONFIDENCE_VALUE = 0.65
+CONFIDENCE_THRESHOLD = 0.65
 
 def witLookup(message):
 
@@ -10,7 +12,7 @@ def witLookup(message):
 
 	c = pycurl.Curl()
 
-	storage = StringIO()
+	storage = StringIO.StringIO()
 
 	c.setopt(c.URL, "https://api.wit.ai/message?q=" + message)
 	c.setopt(c.HTTPHEADER, ['Authorization: Bearer 64ZXFRIL27NFGCJQ4WQH4VYQY7DD3QQK'])
@@ -21,7 +23,7 @@ def witLookup(message):
 	try:
 		resultJSON = json.loads(storage.getvalue())
 		print resultJSON['outcome']['confidence']
-		if (float(resultJSON['outcome']['confidence']) > CONFIDENCE_VALUE):
+		if (float(resultJSON['outcome']['confidence']) > CONFIDENCE_THRESHOLD):
 			return resultJSON['outcome']
 		else:
 			return []
